@@ -31,6 +31,13 @@ public class Jinjja {
                 case "bye":
                     exitState = true;
                     break;
+                case "list":
+                    printDivider();
+                    for (int i = 0; i < listInputs.size(); i++) {
+                        System.out.println((i + 1) + ". " + listInputs.get(i));
+                    }
+                    printDivider();
+                    break;
                 default:
                     listInputs.add(command);
                     printDivider();
