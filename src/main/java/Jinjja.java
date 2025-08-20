@@ -21,7 +21,7 @@ public class Jinjja {
         printGreeting();
         printDivider();
         // List to store user input
-        ArrayList<String> listInputs = new ArrayList<>();
+        ArrayList<Task> listInputs = new ArrayList<>();
         // Loop to handle user input
         Scanner userInput = new Scanner(System.in);
         boolean exitState = false;
@@ -34,12 +34,13 @@ public class Jinjja {
                 case "list":
                     printDivider();
                     for (int i = 0; i < listInputs.size(); i++) {
-                        System.out.println((i + 1) + ". " + listInputs.get(i));
+                        System.out.println((i + 1) + "." + listInputs.get(i));
                     }
                     printDivider();
                     break;
                 default:
-                    listInputs.add(command);
+                    Task newTask = new Task(command);
+                    listInputs.add(newTask);
                     printDivider();
                     System.out.println("added: " + command);
                     printDivider();
