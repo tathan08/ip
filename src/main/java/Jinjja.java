@@ -1,11 +1,22 @@
 public class Jinjja {
-    public static void main(String[] args) {
-        String newline = "____________________________________________________________";
-        System.out.println(newline);
+    public static void printGreeting() {
         System.out.println("Hello! I'm Jinjja");
         System.out.println("What can I do for you?");
-        System.out.println(newline);
+    }
+    
+    public static void printFarewell() {
         System.out.println("Bye. Hope to see you again soon!");
-        System.out.println(newline);
+    }
+
+    public static void printDivider() {
+        System.out.println("____________________________________________________________");
+    }
+
+    public static void main(String[] args) {
+        printDivider();
+        printGreeting();
+        printDivider();
+        printFarewell();
+        printDivider();
     }
 }
