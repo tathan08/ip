@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Jinjja {
     public static void printGreeting() {
@@ -19,6 +20,8 @@ public class Jinjja {
         printDivider();
         printGreeting();
         printDivider();
+        // List to store user input
+        ArrayList<String> listInputs = new ArrayList<>();
         // Loop to handle user input
         Scanner userInput = new Scanner(System.in);
         boolean exitState = false;
@@ -29,8 +32,9 @@ public class Jinjja {
                     exitState = true;
                     break;
                 default:
+                    listInputs.add(command);
                     printDivider();
-                    System.out.println(command);
+                    System.out.println("added: " + command);
                     printDivider();
             }
         }
