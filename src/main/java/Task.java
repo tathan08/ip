@@ -7,6 +7,16 @@ class Task {
         this.description = description;
     }
 
+    public boolean markDone() {
+        this.done = true;
+        return true;
+    }
+
+    public boolean markNotDone() {
+        this.done = false;
+        return true;
+    }
+
     @Override
     public String toString() {
         return "[" + (done ? "X" : " ") + "] " + description;
