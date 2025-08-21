@@ -27,8 +27,12 @@ public class Jinjja {
         boolean exitState = false;
         while (!exitState) {
             String command = userInput.nextLine();
-            String[] parts = command.split(" ", 2);
-            String action = parts[0];
+            // List to store part of commands
+            ArrayList<String> parts = new ArrayList<>();
+            for (String part : command.split(" ")) {
+                parts.add(part);
+            }
+            String action = parts.get(0);
             switch(action) {
                 case "bye":
                     exitState = true;
@@ -41,8 +45,8 @@ public class Jinjja {
                     printDivider();
                     break;
                 case "mark":
-                    if (parts.length > 1) {
-                        int taskNum = Integer.parseInt(parts[1]);
+                    if (parts.size() > 1) {
+                        int taskNum = Integer.parseInt(parts.get(1));
                         printDivider();      
                         if (taskNum > 0 && taskNum <= listInputs.size()) {
                             listInputs.get(taskNum - 1).markDone();
@@ -55,8 +59,8 @@ public class Jinjja {
                     }
                     break;
                 case "unmark":
-                    if (parts.length > 1) {
-                        int taskNum = Integer.parseInt(parts[1]);
+                    if (parts.size() > 1) {
+                        int taskNum = Integer.parseInt(parts.get(1));
                         printDivider();      
                         if (taskNum > 0 && taskNum <= listInputs.size()) {
                             listInputs.get(taskNum - 1).markNotDone();
