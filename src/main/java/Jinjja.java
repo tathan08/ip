@@ -45,119 +45,187 @@ public class Jinjja {
                     printDivider();
                     break;
                 case "mark":
-                    if (parts.size() > 1) {
-                        int taskNum = Integer.parseInt(parts.get(1));
-                        printDivider();      
-                        if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).markDone();
-                            System.out.println("Nice! I've marked this task as done:");
-                            System.out.println("  " + listInputs.get(taskNum - 1));
+                    try {
+                        if (parts.size() > 1) {
+                            int taskNum = Integer.parseInt(parts.get(1));     
+                            if (taskNum > 0 && taskNum <= listInputs.size()) {
+                                listInputs.get(taskNum - 1).markDone();
+                                printDivider();
+                                System.out.println("Nice! I've marked this task as done:");
+                                System.out.println("  " + listInputs.get(taskNum - 1));
+                            } else if (listInputs.size() == 0) {
+                                throw new ArrayIndexOutOfBoundsException("No tasks available.");
+                            } else {
+                                throw new NumberFormatException("Task number is out of range. \n" +
+                                "Please enter a number between 1 and " + listInputs.size() + ".");
+                            }
+                            printDivider();
                         } else {
-                            System.out.println("Invalid task number.");
+                            throw new MissingParameterException("Task number is missing.");
                         }
+                    } catch (MissingParameterException e) {
+                        printDivider();
+                        System.out.println(e.getMessage());
+                        printDivider();
+                    } catch (NumberFormatException e) {
+                        printDivider();
+                        System.out.println("Invalid task number format. " + e.getMessage());
+                        printDivider();
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        printDivider();
+                        System.out.println(e.getMessage());
                         printDivider();
                     }
                     break;
                 case "unmark":
-                    if (parts.size() > 1) {
-                        int taskNum = Integer.parseInt(parts.get(1));
-                        printDivider();      
-                        if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).markNotDone();
-                            System.out.println("OK, I've marked this task as not done yet:");
-                            System.out.println("  " + listInputs.get(taskNum - 1));
+                    try {
+                        if (parts.size() > 1) {
+                            int taskNum = Integer.parseInt(parts.get(1));    
+                            if (taskNum > 0 && taskNum <= listInputs.size()) {
+                                listInputs.get(taskNum - 1).markNotDone();
+                                printDivider();
+                                System.out.println("OK, I've marked this task as not done yet:");
+                                System.out.println("  " + listInputs.get(taskNum - 1));
+                            } else {
+                                throw new NumberFormatException("Task number is out of range. \n" +
+                                "Please enter a number between 1 and " + listInputs.size() + ".");
+                            }
+                            printDivider();
                         } else {
-                            System.out.println("Invalid task number.");
+                            throw new MissingParameterException("Task number is missing.");
                         }
+                    } catch (MissingParameterException e) {
+                        printDivider();
+                        System.out.println(e.getMessage());
+                        printDivider();
+                    } catch (NumberFormatException e) {
+                        printDivider();
+                        System.out.println("Invalid task number format. " + e.getMessage());
                         printDivider();
                     }
                     break;
                 case "todo":
-                    if (parts.size() > 1) {
-                        // use stringbuilder so concat is faster for a longer task name
-                        StringBuilder descBuilder = new StringBuilder();
-                        for (int i = 1; i < parts.size(); i++) {
-                            descBuilder.append(parts.get(i));
-                            if (i < parts.size() - 1) descBuilder.append(" ");
+                    try {
+                        if (parts.size() > 1) {
+                            // use stringbuilder so concat is faster for a longer task name
+                            StringBuilder descBuilder = new StringBuilder();
+                            for (int i = 1; i < parts.size(); i++) {
+                                descBuilder.append(parts.get(i));
+                                if (i < parts.size() - 1) {
+                                    descBuilder.append(" ");
+                                }
+                            }
+                            Task newTask = new Todo(descBuilder.toString());
+                            listInputs.add(newTask);
+                            printDivider();
+                            System.out.println("Got it. I've added this task:");
+                            System.out.println("  " + newTask);
+                            System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                            printDivider();
+                        } else {
+                            throw new MissingParameterException("Task description is missing.");
                         }
-                        Task newTask = new Todo(descBuilder.toString());
-                        listInputs.add(newTask);
+                    } catch (MissingParameterException e) {
                         printDivider();
-                        System.out.println("Got it. I've added this task:");
-                        System.out.println("  " + newTask);
-                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        System.out.println(e.getMessage());
                         printDivider();
                     }
                     break;
                 case "deadline":
-                    // Find the "/by" delimiter
-                    int byIndex = -1;
-                    for (int i = 1; i < parts.size(); i++) {
-                        if (parts.get(i).equals("/by")) {
-                            byIndex = i;
-                            break;
+                    try {
+                        // Find the "/by" delimiter
+                        int byIndex = -1;
+                        for (int i = 1; i < parts.size(); i++) {
+                            if (parts.get(i).equals("/by")) {
+                                byIndex = i;
+                                break;
+                            }
                         }
-                    }
-                    if (byIndex != -1 && byIndex > 1 && byIndex < parts.size() - 1) {
-                        // use stringbuilder so concat is faster for a longer task name
-                        StringBuilder descBuilder = new StringBuilder();
-                        for (int i = 1; i < byIndex; i++) {
-                            descBuilder.append(parts.get(i));
-                            if (i < byIndex - 1) descBuilder.append(" ");
+                        if (byIndex != -1 && byIndex > 1 && byIndex < parts.size() - 1) {
+                            // use stringbuilder so concat is faster for a longer task name
+                            StringBuilder descBuilder = new StringBuilder();
+                            for (int i = 1; i < byIndex; i++) {
+                                descBuilder.append(parts.get(i));
+                                if (i < byIndex - 1) {
+                                    descBuilder.append(" ");
+                                }
+                            }
+                            StringBuilder byBuilder = new StringBuilder();
+                            for (int i = byIndex + 1; i < parts.size(); i++) {
+                                byBuilder.append(parts.get(i));
+                                if (i < parts.size() - 1) {
+                                    byBuilder.append(" ");
+                                }
+                            }
+                            String taskDescription = descBuilder.toString();
+                            String byDate = byBuilder.toString();
+                            Task newTask = new Deadline(taskDescription, byDate);
+                            listInputs.add(newTask);
+                            printDivider();
+                            System.out.println("Got it. I've added this task:");
+                            System.out.println("  " + newTask);
+                            System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                            printDivider();
+                        } else {
+                            throw new MissingParameterException("Deadline description or /by is missing.");
                         }
-                        StringBuilder byBuilder = new StringBuilder();
-                        for (int i = byIndex + 1; i < parts.size(); i++) {
-                            byBuilder.append(parts.get(i));
-                            if (i < parts.size() - 1) byBuilder.append(" ");
-                        }
-                        String taskDescription = descBuilder.toString();
-                        String byDate = byBuilder.toString();
-                        Task newTask = new Deadline(taskDescription, byDate);
-                        listInputs.add(newTask);
+                    } catch (MissingParameterException e) {
                         printDivider();
-                        System.out.println("Got it. I've added this task:");
-                        System.out.println("  " + newTask);
-                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        System.out.println(e.getMessage());
                         printDivider();
                     }
                     break;
                 case "event":
-                    // Find the "/from" and "/to" delimiter
-                    int fromIndex = -1;
-                    int toIndex = -1;
-                    for (int i = 1; i < parts.size(); i++) {
-                        if (parts.get(i).equals("/from")) {
-                            fromIndex = i;
-                        } else if (parts.get(i).equals("/to")) {
-                            toIndex = i;
+                    try {
+                        // Find the "/from" and "/to" delimiter
+                        int fromIndex = -1;
+                        int toIndex = -1;
+                        for (int i = 1; i < parts.size(); i++) {
+                            if (parts.get(i).equals("/from")) {
+                                fromIndex = i;
+                            } else if (parts.get(i).equals("/to")) {
+                                toIndex = i;
+                            }
                         }
-                    }
-                    if (fromIndex != -1 && toIndex != -1 && fromIndex + 1 < toIndex) {
-                        // use stringbuilder so concat is faster for a longer task name
-                        StringBuilder descBuilder = new StringBuilder();
-                        for (int i = 1; i < fromIndex; i++) {
-                            descBuilder.append(parts.get(i));
-                            if (i < fromIndex - 1) descBuilder.append(" ");
+                        if (fromIndex != -1 && toIndex != -1 && fromIndex + 1 < toIndex) {
+                            // use stringbuilder so concat is faster for a longer task name
+                            StringBuilder descBuilder = new StringBuilder();
+                            for (int i = 1; i < fromIndex; i++) {
+                                descBuilder.append(parts.get(i));
+                                if (i < fromIndex - 1) {
+                                    descBuilder.append(" ");
+                                }
+                            }
+                            StringBuilder fromBuilder = new StringBuilder();
+                            for (int i = fromIndex + 1; i < toIndex; i++) {
+                                fromBuilder.append(parts.get(i));
+                                if (i < toIndex - 1) {
+                                    fromBuilder.append(" ");
+                                }
+                            }
+                            StringBuilder toBuilder = new StringBuilder();
+                            for (int i = toIndex + 1; i < parts.size(); i++) {
+                                toBuilder.append(parts.get(i));
+                                if (i < parts.size() - 1) {
+                                    toBuilder.append(" ");
+                                }
+                            }
+                            String taskDescription = descBuilder.toString();
+                            String fromDate = fromBuilder.toString();
+                            String toDate = toBuilder.toString();
+                            Task newTask = new Event(taskDescription, fromDate, toDate);
+                            listInputs.add(newTask);
+                            printDivider();
+                            System.out.println("Got it. I've added this task:");
+                            System.out.println("  " + newTask);
+                            System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                            printDivider();
+                        } else {
+                            throw new MissingParameterException("Event description, /from, or /to is missing.");
                         }
-                        StringBuilder fromBuilder = new StringBuilder();
-                        for (int i = fromIndex + 1; i < toIndex; i++) {
-                            fromBuilder.append(parts.get(i));
-                            if (i < toIndex - 1) fromBuilder.append(" ");
-                        }
-                        StringBuilder toBuilder = new StringBuilder();
-                        for (int i = toIndex + 1; i < parts.size(); i++) {
-                            toBuilder.append(parts.get(i));
-                            if (i < parts.size() - 1) toBuilder.append(" ");
-                        }
-                        String taskDescription = descBuilder.toString();
-                        String fromDate = fromBuilder.toString();
-                        String toDate = toBuilder.toString();
-                        Task newTask = new Event(taskDescription, fromDate, toDate);
-                        listInputs.add(newTask);
+                    } catch (MissingParameterException e) {
                         printDivider();
-                        System.out.println("Got it. I've added this task:");
-                        System.out.println("  " + newTask);
-                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        System.out.println(e.getMessage());
                         printDivider();
                     }
                     break;
