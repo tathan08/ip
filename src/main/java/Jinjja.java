@@ -84,6 +84,38 @@ public class Jinjja {
                         printDivider();
                     }
                     break;
+                case "deadline":
+                    // Find the "/by" delimiter
+                    int byIndex = -1;
+                    for (int i = 1; i < parts.size(); i++) {
+                        if (parts.get(i).equals("/by")) {
+                            byIndex = i;
+                            break;
+                        }
+                    }
+                    if (byIndex != -1 && byIndex > 1 && byIndex < parts.size() - 1) {
+                        // use stringbuilder so concat is faster for a longer task name
+                        StringBuilder descBuilder = new StringBuilder();
+                        for (int i = 1; i < byIndex; i++) {
+                            descBuilder.append(parts.get(i));
+                            if (i < byIndex - 1) descBuilder.append(" ");
+                        }
+                        StringBuilder byBuilder = new StringBuilder();
+                        for (int i = byIndex + 1; i < parts.size(); i++) {
+                            byBuilder.append(parts.get(i));
+                            if (i < parts.size() - 1) byBuilder.append(" ");
+                        }
+                        String taskDescription = descBuilder.toString();
+                        String byDate = byBuilder.toString();
+                        Task newTask = new Deadline(taskDescription, byDate);
+                        listInputs.add(newTask);
+                        printDivider();
+                        System.out.println("Got it. I've added this task:");
+                        System.out.println("  " + newTask);
+                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        printDivider();
+                    }
+                    break;
                 default:
                     Task newTask = new Task(command);
                     listInputs.add(newTask);
