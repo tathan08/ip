@@ -74,12 +74,17 @@ public class Jinjja {
                     break;
                 case "todo":
                     if (parts.size() > 1) {
-                        String taskDescription = parts.get(1);
-                        Task newTask = new Todo(taskDescription);
+                        // use stringbuilder so concat is faster for a longer task name
+                        StringBuilder descBuilder = new StringBuilder();
+                        for (int i = 1; i < parts.size(); i++) {
+                            descBuilder.append(parts.get(i));
+                            if (i < parts.size() - 1) descBuilder.append(" ");
+                        }
+                        Task newTask = new Todo(descBuilder.toString());
                         listInputs.add(newTask);
                         printDivider();
                         System.out.println("Got it. I've added this task:");
-                        System.out.println(newTask);
+                        System.out.println("  " + newTask);
                         System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
                         printDivider();
                     }
