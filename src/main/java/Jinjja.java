@@ -27,7 +27,9 @@ public class Jinjja {
         boolean exitState = false;
         while (!exitState) {
             String command = userInput.nextLine();
-            switch(command) {
+            String[] parts = command.split(" ", 2);
+            String action = parts[0];
+            switch(action) {
                 case "bye":
                     exitState = true;
                     break;
@@ -37,6 +39,34 @@ public class Jinjja {
                         System.out.println((i + 1) + "." + listInputs.get(i));
                     }
                     printDivider();
+                    break;
+                case "mark":
+                    if (parts.length > 1) {
+                        int taskNum = Integer.parseInt(parts[1]);
+                        printDivider();      
+                        if (taskNum > 0 && taskNum <= listInputs.size()) {
+                            listInputs.get(taskNum - 1).markDone();
+                            System.out.println("Nice! I've marked this task as done:");
+                            System.out.println("  " + listInputs.get(taskNum - 1));
+                        } else {
+                            System.out.println("Invalid task number.");
+                        }
+                        printDivider();
+                    }
+                    break;
+                case "unmark":
+                    if (parts.length > 1) {
+                        int taskNum = Integer.parseInt(parts[1]);
+                        printDivider();      
+                        if (taskNum > 0 && taskNum <= listInputs.size()) {
+                            listInputs.get(taskNum - 1).markNotDone();
+                            System.out.println("OK, I've marked this task as not done yet:");
+                            System.out.println("  " + listInputs.get(taskNum - 1));
+                        } else {
+                            System.out.println("Invalid task number.");
+                        }
+                        printDivider();
+                    }
                     break;
                 default:
                     Task newTask = new Task(command);
