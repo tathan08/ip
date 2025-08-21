@@ -230,10 +230,8 @@ public class Jinjja {
                     }
                     break;
                 default:
-                    Task newTask = new Task(command);
-                    listInputs.add(newTask);
                     printDivider();
-                    System.out.println("added: " + command);
+                    System.out.println("I have no clue what you just said. Please use a command I know.");
                     printDivider();
             }
         }
