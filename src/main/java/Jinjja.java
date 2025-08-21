@@ -121,6 +121,46 @@ public class Jinjja {
                         printDivider();
                     }
                     break;
+                case "event":
+                    // Find the "/from" and "/to" delimiter
+                    int fromIndex = -1;
+                    int toIndex = -1;
+                    for (int i = 1; i < parts.size(); i++) {
+                        if (parts.get(i).equals("/from")) {
+                            fromIndex = i;
+                        } else if (parts.get(i).equals("/to")) {
+                            toIndex = i;
+                        }
+                    }
+                    if (fromIndex != -1 && toIndex != -1 && fromIndex + 1 < toIndex) {
+                        // use stringbuilder so concat is faster for a longer task name
+                        StringBuilder descBuilder = new StringBuilder();
+                        for (int i = 1; i < fromIndex; i++) {
+                            descBuilder.append(parts.get(i));
+                            if (i < fromIndex - 1) descBuilder.append(" ");
+                        }
+                        StringBuilder fromBuilder = new StringBuilder();
+                        for (int i = fromIndex + 1; i < toIndex; i++) {
+                            fromBuilder.append(parts.get(i));
+                            if (i < toIndex - 1) fromBuilder.append(" ");
+                        }
+                        StringBuilder toBuilder = new StringBuilder();
+                        for (int i = toIndex + 1; i < parts.size(); i++) {
+                            toBuilder.append(parts.get(i));
+                            if (i < parts.size() - 1) toBuilder.append(" ");
+                        }
+                        String taskDescription = descBuilder.toString();
+                        String fromDate = fromBuilder.toString();
+                        String toDate = toBuilder.toString();
+                        Task newTask = new Event(taskDescription, fromDate, toDate);
+                        listInputs.add(newTask);
+                        printDivider();
+                        System.out.println("Got it. I've added this task:");
+                        System.out.println("  " + newTask);
+                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        printDivider();
+                    }
+                    break;
                 default:
                     Task newTask = new Task(command);
                     listInputs.add(newTask);
