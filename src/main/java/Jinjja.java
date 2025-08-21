@@ -72,6 +72,18 @@ public class Jinjja {
                         printDivider();
                     }
                     break;
+                case "todo":
+                    if (parts.size() > 1) {
+                        String taskDescription = parts.get(1);
+                        Task newTask = new Todo(taskDescription);
+                        listInputs.add(newTask);
+                        printDivider();
+                        System.out.println("Got it. I've added this task:");
+                        System.out.println(newTask);
+                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        printDivider();
+                    }
+                    break;
                 default:
                     Task newTask = new Task(command);
                     listInputs.add(newTask);
