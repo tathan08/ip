@@ -229,6 +229,35 @@ public class Jinjja {
                         printDivider();
                     }
                     break;
+                case "delete":
+                    try {
+                        if (parts.size() < 2) {
+                            throw new MissingParameterException("Task number is missing.");
+                        }
+                        int taskNumber = Integer.parseInt(parts.get(1));
+                        if (taskNumber < 1 || taskNumber > listInputs.size()) {
+                            throw new ArrayIndexOutOfBoundsException("Task number is out of range.");
+                        }
+                        Task removedTask = listInputs.remove(taskNumber - 1);
+                        printDivider();
+                        System.out.println("Noted. I've removed this task:");
+                        System.out.println("  " + removedTask);
+                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        printDivider();
+                    } catch (MissingParameterException e) {
+                        printDivider();
+                        System.out.println(e.getMessage());
+                        printDivider();
+                    } catch (NumberFormatException e) {
+                        printDivider();
+                        System.out.println("Invalid task number format. " + e.getMessage());
+                        printDivider();
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        printDivider();
+                        System.out.println(e.getMessage());
+                        printDivider();
+                    }
+                    break;
                 default:
                     printDivider();
                     System.out.println("I have no clue what you just said. Please use a command I know.");
