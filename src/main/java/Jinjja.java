@@ -59,13 +59,69 @@ public class Jinjja {
         System.out.println("Tasks saved to " + DATA_FILE_PATH);
     }
 
+    /**
+     * Loads tasks in-place from the specified DATA_FILE_PATH.
+     *
+     * @param tasks The list of tasks to load into.
+     * @throws IOException If an error occurs while reading the file.
+     */
+    public static void loadTasksFromFile(ArrayList<Task> tasks) throws IOException {
+        File dataFile = new File(DATA_FILE_PATH);
+        if (!dataFile.exists()) {
+            System.out.println("No existing task list found. Starting a new list.");
+            return; // No file to load from
+        }
+
+        Scanner fileScanner = new Scanner(dataFile);
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            String[] parts = line.split(" \\| ");
+            String taskType = parts[0];
+            boolean isDone = parts[1].equals("1");
+            String description = parts[2];
+
+            Task task = null;
+            switch (taskType) {
+            case "T":
+                task = new Todo(description);
+                break;
+            case "D":
+                String byDate = parts[3];
+                task = new Deadline(description, byDate);
+                break;
+            case "E":
+                String fromDate = parts[3];
+                String toDate = parts[4];
+                task = new Event(description, fromDate, toDate);
+                break;
+            default:
+                System.out.println("Unknown task type in file: " + taskType);
+                break; // task is still null
+            }
+
+            if (task != null) {
+                task.setDone(isDone);
+                tasks.add(task);
+            }
+        }
+        fileScanner.close();
+        System.out.println("Tasks loaded from " + DATA_FILE_PATH);
+    }
+
     public static void main(String[] args) {
+        // List to store user input
+        ArrayList<Task> listInputs = new ArrayList<>();
+
         // Greet user
         printDivider();
         printGreeting();
+        try {
+            loadTasksFromFile(listInputs);
+        } catch (IOException e) {
+            System.err.println("Error loading tasks from file: " + e.getMessage());
+        }
         printDivider();
-        // List to store user input
-        ArrayList<Task> listInputs = new ArrayList<>();
+
         // Loop to handle user input
         Scanner userInput = new Scanner(System.in);
         boolean exitState = false;
@@ -80,17 +136,11 @@ public class Jinjja {
             switch (action) {
             case "bye":
                 exitState = true;
-                try {
-                    saveTasksToFile(listInputs);
-                } catch (IOException e) {
-                    System.err.println("Error saving tasks to file: " + e.getMessage());
-                }
                 break;
             case "list":
                 printDivider();
                 for (int i = 0; i < listInputs.size(); i++) {
                     System.out.println((i + 1) + "." + listInputs.get(i));
-                    System.out.println(listInputs.get(i).toFileFormat());
                 }
                 printDivider();
                 break;
@@ -322,6 +372,11 @@ public class Jinjja {
         }
         userInput.close();
         printDivider();
+        try {
+            saveTasksToFile(listInputs);
+        } catch (IOException e) {
+            System.err.println("Error saving tasks to file: " + e.getMessage());
+        }
         printFarewell();
         printDivider();
     }
