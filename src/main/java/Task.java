@@ -26,7 +26,7 @@ class Task {
      * @return A string representation of the task in file format.
      */
     public String toFileFormat() {
-        return (this.isDone ? 1 : 0) + "|" + this.description;
+        return (this.isDone ? 1 : 0) + " | " + this.description;
     }
 
     @Override
