@@ -1,24 +1,36 @@
 class Task {
-    private boolean done;
+    private boolean isDone;
     private String description;
 
     public Task(String description) {
-        this.done = false;
+        this.isDone = false;
         this.description = description;
     }
 
-    public boolean markDone() {
-        this.done = true;
-        return true;
+    public boolean setDone(boolean isDone) {
+        this.isDone = isDone;
+        return true; // Indicate that the status was changed
     }
 
-    public boolean markNotDone() {
-        this.done = false;
-        return true;
+    public boolean getIsDone() {
+        return this.isDone;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    /**
+     * Converts the task to a format suitable for saving to a file.
+     * 
+     * @return A string representation of the task in file format.
+     */
+    public String toFileFormat() {
+        return (this.isDone ? 1 : 0) + "|" + this.description;
     }
 
     @Override
     public String toString() {
-        return "[" + (done ? "X" : " ") + "] " + description;
+        return "[" + (this.isDone ? "X" : " ") + "] " + this.description;
     }
 }
