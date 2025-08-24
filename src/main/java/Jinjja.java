@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -8,6 +11,7 @@ import java.util.Scanner;
  * users via command-line interface.
  */
 public class Jinjja {
+    private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
 
     /**
      * Prints a greeting message to the user.
@@ -31,13 +35,93 @@ public class Jinjja {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Saves the list of tasks to a file.
+     *
+     * @param tasks The list of tasks to save.
+     * @throws IOException If an error occurs while saving tasks to the file.
+     */
+    public static void saveTasksToFile(ArrayList<Task> tasks) throws IOException {
+        // Create directory if it doesn't exist
+        File dataDir = new File("ip/data");
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
+
+        // Write all current tasks into the file
+        // Will override existing data if file already exists
+        FileWriter writer = new FileWriter(DATA_FILE_PATH);
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            writer.write(task.toFileFormat() + "\n");
+        }
+        writer.close();
+        System.out.println("Tasks saved to " + DATA_FILE_PATH);
+    }
+
+    /**
+     * Loads tasks in-place from the specified DATA_FILE_PATH.
+     *
+     * @param tasks The list of tasks to load into.
+     * @throws IOException If an error occurs while reading the file.
+     */
+    public static void loadTasksFromFile(ArrayList<Task> tasks) throws IOException {
+        File dataFile = new File(DATA_FILE_PATH);
+        if (!dataFile.exists()) {
+            System.out.println("No existing task list found. Starting a new list.");
+            return; // No file to load from
+        }
+
+        Scanner fileScanner = new Scanner(dataFile);
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            String[] parts = line.split(" \\| ");
+            String taskType = parts[0];
+            boolean isDone = parts[1].equals("1");
+            String description = parts[2];
+
+            Task task = null;
+            switch (taskType) {
+            case "T":
+                task = new Todo(description);
+                break;
+            case "D":
+                String byDate = parts[3];
+                task = new Deadline(description, byDate);
+                break;
+            case "E":
+                String fromDate = parts[3];
+                String toDate = parts[4];
+                task = new Event(description, fromDate, toDate);
+                break;
+            default:
+                System.out.println("Unknown task type in file: " + taskType);
+                break; // task is still null
+            }
+
+            if (task != null) {
+                task.setDone(isDone);
+                tasks.add(task);
+            }
+        }
+        fileScanner.close();
+        System.out.println("Tasks loaded from " + DATA_FILE_PATH);
+    }
+
     public static void main(String[] args) {
+        // List to store user input
+        ArrayList<Task> listInputs = new ArrayList<>();
+
         // Greet user
         printDivider();
         printGreeting();
+        try {
+            loadTasksFromFile(listInputs);
+        } catch (IOException e) {
+            System.err.println("Error loading tasks from file: " + e.getMessage());
+        }
         printDivider();
-        // List to store user input
-        ArrayList<Task> listInputs = new ArrayList<>();
+
         // Loop to handle user input
         Scanner userInput = new Scanner(System.in);
         boolean exitState = false;
@@ -65,7 +149,7 @@ public class Jinjja {
                     if (parts.size() > 1) {
                         int taskNum = Integer.parseInt(parts.get(1));
                         if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).markDone();
+                            listInputs.get(taskNum - 1).setDone(true);
                             printDivider();
                             System.out.println("Nice! I've marked this task as done:");
                             System.out.println("  " + listInputs.get(taskNum - 1));
@@ -99,7 +183,7 @@ public class Jinjja {
                     if (parts.size() > 1) {
                         int taskNum = Integer.parseInt(parts.get(1));
                         if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).markNotDone();
+                            listInputs.get(taskNum - 1).setDone(false);
                             printDivider();
                             System.out.println("OK, I've marked this task as not done yet:");
                             System.out.println("  " + listInputs.get(taskNum - 1));
@@ -288,6 +372,11 @@ public class Jinjja {
         }
         userInput.close();
         printDivider();
+        try {
+            saveTasksToFile(listInputs);
+        } catch (IOException e) {
+            System.err.println("Error saving tasks to file: " + e.getMessage());
+        }
         printFarewell();
         printDivider();
     }
