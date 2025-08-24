@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -8,6 +11,7 @@ import java.util.Scanner;
  * users via command-line interface.
  */
 public class Jinjja {
+    private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
 
     /**
      * Prints a greeting message to the user.
@@ -31,6 +35,30 @@ public class Jinjja {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Saves the list of tasks to a file.
+     *
+     * @param tasks The list of tasks to save.
+     * @throws IOException If an error occurs while saving tasks to the file.
+     */
+    public static void saveTasksToFile(ArrayList<Task> tasks) throws IOException {
+        // Create directory if it doesn't exist
+        File dataDir = new File("ip/data");
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
+
+        // Write all current tasks into the file
+        // Will override existing data if file already exists
+        FileWriter writer = new FileWriter(DATA_FILE_PATH);
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            writer.write(task.toFileFormat() + "\n");
+        }
+        writer.close();
+        System.out.println("Tasks saved to " + DATA_FILE_PATH);
+    }
+
     public static void main(String[] args) {
         // Greet user
         printDivider();
@@ -52,11 +80,17 @@ public class Jinjja {
             switch (action) {
             case "bye":
                 exitState = true;
+                try {
+                    saveTasksToFile(listInputs);
+                } catch (IOException e) {
+                    System.err.println("Error saving tasks to file: " + e.getMessage());
+                }
                 break;
             case "list":
                 printDivider();
                 for (int i = 0; i < listInputs.size(); i++) {
                     System.out.println((i + 1) + "." + listInputs.get(i));
+                    System.out.println(listInputs.get(i).toFileFormat());
                 }
                 printDivider();
                 break;
@@ -65,7 +99,7 @@ public class Jinjja {
                     if (parts.size() > 1) {
                         int taskNum = Integer.parseInt(parts.get(1));
                         if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).markDone();
+                            listInputs.get(taskNum - 1).setDone(true);
                             printDivider();
                             System.out.println("Nice! I've marked this task as done:");
                             System.out.println("  " + listInputs.get(taskNum - 1));
@@ -99,7 +133,7 @@ public class Jinjja {
                     if (parts.size() > 1) {
                         int taskNum = Integer.parseInt(parts.get(1));
                         if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).markNotDone();
+                            listInputs.get(taskNum - 1).setDone(false);
                             printDivider();
                             System.out.println("OK, I've marked this task as not done yet:");
                             System.out.println("  " + listInputs.get(taskNum - 1));
