@@ -1,17 +1,21 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Jinjja is a personal assistant chatbot that helps users manage their tasks.
- * It supports adding, listing, marking, unmarking, and deleting tasks. Tasks
- * can be of three types: Todo, Deadline, and Event. The bot interacts with
- * users via command-line interface.
+ * Jinjja is a personal assistant chatbot that helps users manage their tasks. It supports adding, listing, marking,
+ * unmarking, and deleting tasks. Tasks can be of three types: Todo, Deadline, and Event. The bot interacts with users
+ * via command-line interface.
  */
 public class Jinjja {
     private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
+
+    private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
      * Prints a greeting message to the user.
@@ -86,12 +90,15 @@ public class Jinjja {
                 task = new Todo(description);
                 break;
             case "D":
-                String byDate = parts[3];
+                String byDateString = parts[3];
+                LocalDateTime byDate = LocalDateTime.parse(byDateString, DATETIME_FILE);
                 task = new Deadline(description, byDate);
                 break;
             case "E":
-                String fromDate = parts[3];
-                String toDate = parts[4];
+                String fromDateString = parts[3];
+                String toDateString = parts[4];
+                LocalDateTime fromDate = LocalDateTime.parse(fromDateString, DATETIME_FILE);
+                LocalDateTime toDate = LocalDateTime.parse(toDateString, DATETIME_FILE);
                 task = new Event(description, fromDate, toDate);
                 break;
             default:
@@ -157,8 +164,7 @@ public class Jinjja {
                             throw new ArrayIndexOutOfBoundsException("No tasks available.");
                         } else {
                             throw new NumberFormatException("Task number is out of range. \n"
-                                                            + "Please enter a number between 1 and " + listInputs.size()
-                                                            + ".");
+                                    + "Please enter a number between 1 and " + listInputs.size() + ".");
                         }
                         printDivider();
                     } else {
@@ -189,8 +195,7 @@ public class Jinjja {
                             System.out.println("  " + listInputs.get(taskNum - 1));
                         } else {
                             throw new NumberFormatException("Task number is out of range. \n"
-                                                            + "Please enter a number between 1 and " + listInputs.size()
-                                                            + ".");
+                                    + "Please enter a number between 1 and " + listInputs.size() + ".");
                         }
                         printDivider();
                     } else {
@@ -263,7 +268,17 @@ public class Jinjja {
                         }
                         String taskDescription = descBuilder.toString();
                         String byDate = byBuilder.toString();
-                        Task newTask = new Deadline(taskDescription, byDate);
+
+                        // Parse the byDate string into a LocalDateTime object
+                        LocalDateTime byDateTime;
+                        try {
+                            byDateTime = LocalDateTime.parse(byDate, DATETIME_FILE);
+                        } catch (DateTimeParseException e) {
+                            // prompt user again for properly formatted date
+                            throw new MissingParameterException("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+                        }
+
+                        Task newTask = new Deadline(taskDescription, byDateTime);
                         listInputs.add(newTask);
                         printDivider();
                         System.out.println("Got it. I've added this task:");
@@ -316,9 +331,30 @@ public class Jinjja {
                             }
                         }
                         String taskDescription = descBuilder.toString();
-                        String fromDate = fromBuilder.toString();
-                        String toDate = toBuilder.toString();
-                        Task newTask = new Event(taskDescription, fromDate, toDate);
+                        String fromDateString = fromBuilder.toString();
+                        String toDateString = toBuilder.toString();
+
+                        // Parse the fromDate string into a LocalDateTime object
+                        LocalDateTime fromDateTime;
+                        try {
+                            fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
+                        } catch (DateTimeParseException e) {
+                            // prompt user again for properly formatted date
+                            throw new MissingParameterException(
+                                    "Invalid date format for /from. Please use yyyy-MM-dd HH:mm.");
+                        }
+
+                        // Parse the toDate string into a LocalDateTime object
+                        LocalDateTime toDateTime;
+                        try {
+                            toDateTime = LocalDateTime.parse(toDateString, DATETIME_FILE);
+                        } catch (DateTimeParseException e) {
+                            // prompt user again for properly formatted date
+                            throw new MissingParameterException(
+                                    "Invalid date format for /to. Please use yyyy-MM-dd HH:mm.");
+                        }
+
+                        Task newTask = new Event(taskDescription, fromDateTime, toDateTime);
                         listInputs.add(newTask);
                         printDivider();
                         System.out.println("Got it. I've added this task:");
