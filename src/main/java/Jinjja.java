@@ -1,5 +1,3 @@
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +14,12 @@ public class Jinjja {
     private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
 
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    private Storage storage;
+
+    public Jinjja() {
+        this.storage = new Storage(DATA_FILE_PATH);
+    }
 
     /**
      * Prints a greeting message to the user.
@@ -39,83 +43,7 @@ public class Jinjja {
         System.out.println("____________________________________________________________");
     }
 
-    /**
-     * Saves the list of tasks to a file.
-     *
-     * @param tasks The list of tasks to save.
-     * @throws IOException If an error occurs while saving tasks to the file.
-     */
-    public static void saveTasksToFile(ArrayList<Task> tasks) throws IOException {
-        // Create directory if it doesn't exist
-        File dataDir = new File("ip/data");
-        if (!dataDir.exists()) {
-            dataDir.mkdirs();
-        }
-
-        // Write all current tasks into the file
-        // Will override existing data if file already exists
-        FileWriter writer = new FileWriter(DATA_FILE_PATH);
-        for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            writer.write(task.toFileFormat() + "\n");
-        }
-        writer.close();
-        System.out.println("Tasks saved to " + DATA_FILE_PATH);
-    }
-
-    /**
-     * Loads tasks in-place from the specified DATA_FILE_PATH.
-     *
-     * @param tasks The list of tasks to load into.
-     * @throws IOException If an error occurs while reading the file.
-     */
-    public static void loadTasksFromFile(ArrayList<Task> tasks) throws IOException {
-        File dataFile = new File(DATA_FILE_PATH);
-        if (!dataFile.exists()) {
-            System.out.println("No existing task list found. Starting a new list.");
-            return; // No file to load from
-        }
-
-        Scanner fileScanner = new Scanner(dataFile);
-        while (fileScanner.hasNextLine()) {
-            String line = fileScanner.nextLine();
-            String[] parts = line.split(" \\| ");
-            String taskType = parts[0];
-            boolean isDone = parts[1].equals("1");
-            String description = parts[2];
-
-            Task task = null;
-            switch (taskType) {
-            case "T":
-                task = new Todo(description);
-                break;
-            case "D":
-                String byDateString = parts[3];
-                LocalDateTime byDate = LocalDateTime.parse(byDateString, DATETIME_FILE);
-                task = new Deadline(description, byDate);
-                break;
-            case "E":
-                String fromDateString = parts[3];
-                String toDateString = parts[4];
-                LocalDateTime fromDate = LocalDateTime.parse(fromDateString, DATETIME_FILE);
-                LocalDateTime toDate = LocalDateTime.parse(toDateString, DATETIME_FILE);
-                task = new Event(description, fromDate, toDate);
-                break;
-            default:
-                System.out.println("Unknown task type in file: " + taskType);
-                break; // task is still null
-            }
-
-            if (task != null) {
-                task.setDone(isDone);
-                tasks.add(task);
-            }
-        }
-        fileScanner.close();
-        System.out.println("Tasks loaded from " + DATA_FILE_PATH);
-    }
-
-    public static void main(String[] args) {
+    public void run() {
         // List to store user input
         ArrayList<Task> listInputs = new ArrayList<>();
 
@@ -123,7 +51,7 @@ public class Jinjja {
         printDivider();
         printGreeting();
         try {
-            loadTasksFromFile(listInputs);
+            storage.loadTasksFromFile(listInputs);
         } catch (IOException e) {
             System.err.println("Error loading tasks from file: " + e.getMessage());
         }
@@ -409,11 +337,15 @@ public class Jinjja {
         userInput.close();
         printDivider();
         try {
-            saveTasksToFile(listInputs);
+            storage.saveTasksToFile(listInputs);
         } catch (IOException e) {
             System.err.println("Error saving tasks to file: " + e.getMessage());
         }
         printFarewell();
         printDivider();
+    }
+
+    public static void main(String[] args) {
+        new Jinjja().run();
     }
 }
