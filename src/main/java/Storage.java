@@ -42,14 +42,15 @@ class Storage {
     /**
      * Loads tasks in-place from the specified DATA_FILE_PATH.
      *
-     * @param tasks The list of tasks to load into.
+     * @return tasks The list of tasks that was loaded.
      * @throws IOException If an error occurs while reading the file.
      */
-    public void loadTasksFromFile(ArrayList<Task> tasks) throws IOException {
+    public ArrayList<Task> loadTasksFromFile() throws IOException {
         File dataFile = new File(this.filePath);
+        ArrayList<Task> tasks = new ArrayList<>();
         if (!dataFile.exists()) {
             System.out.println("No existing task list found. Starting a new list.");
-            return; // No file to load from
+            return tasks; // No file to load from
         }
 
         Scanner fileScanner = new Scanner(dataFile);
@@ -89,5 +90,6 @@ class Storage {
         }
         fileScanner.close();
         System.out.println("Tasks loaded from " + this.filePath);
+        return tasks;
     }
 }
