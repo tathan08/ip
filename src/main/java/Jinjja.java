@@ -16,9 +16,16 @@ public class Jinjja {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private Storage storage;
+    private TaskList list;
 
     public Jinjja() {
         this.storage = new Storage(DATA_FILE_PATH);
+        try {
+            this.list = new TaskList(this.storage.loadTasksFromFile());
+        } catch (IOException e) {
+            System.err.println("Error loading tasks from file: " + e.getMessage());
+            this.list = new TaskList();
+        }
     }
 
     /**
@@ -43,18 +50,13 @@ public class Jinjja {
         System.out.println("____________________________________________________________");
     }
 
+    /**
+     * Runs the main logic of the Jinjja chatbot.
+     */
     public void run() {
-        // List to store user input
-        ArrayList<Task> listInputs = new ArrayList<>();
-
         // Greet user
         printDivider();
         printGreeting();
-        try {
-            storage.loadTasksFromFile(listInputs);
-        } catch (IOException e) {
-            System.err.println("Error loading tasks from file: " + e.getMessage());
-        }
         printDivider();
 
         // Loop to handle user input
@@ -74,26 +76,17 @@ public class Jinjja {
                 break;
             case "list":
                 printDivider();
-                for (int i = 0; i < listInputs.size(); i++) {
-                    System.out.println((i + 1) + "." + listInputs.get(i));
-                }
+                this.list.printTasks();
                 printDivider();
                 break;
             case "mark":
                 try {
                     if (parts.size() > 1) {
                         int taskNum = Integer.parseInt(parts.get(1));
-                        if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).setDone(true);
-                            printDivider();
-                            System.out.println("Nice! I've marked this task as done:");
-                            System.out.println("  " + listInputs.get(taskNum - 1));
-                        } else if (listInputs.size() == 0) {
-                            throw new ArrayIndexOutOfBoundsException("No tasks available.");
-                        } else {
-                            throw new NumberFormatException("Task number is out of range. \n"
-                                    + "Please enter a number between 1 and " + listInputs.size() + ".");
-                        }
+                        this.list.markTask(true, taskNum - 1);
+                        printDivider();
+                        System.out.println("Nice! I've marked this task as done:");
+                        System.out.println("  " + this.list.getTask(taskNum - 1));
                         printDivider();
                     } else {
                         throw new MissingParameterException("Task number is missing.");
@@ -116,15 +109,10 @@ public class Jinjja {
                 try {
                     if (parts.size() > 1) {
                         int taskNum = Integer.parseInt(parts.get(1));
-                        if (taskNum > 0 && taskNum <= listInputs.size()) {
-                            listInputs.get(taskNum - 1).setDone(false);
-                            printDivider();
-                            System.out.println("OK, I've marked this task as not done yet:");
-                            System.out.println("  " + listInputs.get(taskNum - 1));
-                        } else {
-                            throw new NumberFormatException("Task number is out of range. \n"
-                                    + "Please enter a number between 1 and " + listInputs.size() + ".");
-                        }
+                        this.list.markTask(false, taskNum - 1);
+                        printDivider();
+                        System.out.println("OK, I've marked this task as not done yet:");
+                        System.out.println("  " + this.list.getTask(taskNum - 1));
                         printDivider();
                     } else {
                         throw new MissingParameterException("Task number is missing.");
@@ -152,11 +140,11 @@ public class Jinjja {
                             }
                         }
                         Task newTask = new Todo(descBuilder.toString());
-                        listInputs.add(newTask);
+                        this.list.addTask(newTask);
                         printDivider();
                         System.out.println("Got it. I've added this task:");
                         System.out.println("  " + newTask);
-                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        System.out.println("Now you have " + this.list.getSize() + " tasks in the list.");
                         printDivider();
                     } else {
                         throw new MissingParameterException("Task description is missing.");
@@ -207,11 +195,11 @@ public class Jinjja {
                         }
 
                         Task newTask = new Deadline(taskDescription, byDateTime);
-                        listInputs.add(newTask);
+                        this.list.addTask(newTask);
                         printDivider();
                         System.out.println("Got it. I've added this task:");
                         System.out.println("  " + newTask);
-                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        System.out.println("Now you have " + this.list.getSize() + " tasks in the list.");
                         printDivider();
                     } else {
                         throw new MissingParameterException("Deadline description or /by is missing.");
@@ -283,11 +271,11 @@ public class Jinjja {
                         }
 
                         Task newTask = new Event(taskDescription, fromDateTime, toDateTime);
-                        listInputs.add(newTask);
+                        this.list.addTask(newTask);
                         printDivider();
                         System.out.println("Got it. I've added this task:");
                         System.out.println("  " + newTask);
-                        System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                        System.out.println("Now you have " + this.list.getSize() + " tasks in the list.");
                         printDivider();
                     } else {
                         throw new MissingParameterException("Event description, /from, or /to is missing.");
@@ -303,15 +291,12 @@ public class Jinjja {
                     if (parts.size() < 2) {
                         throw new MissingParameterException("Task number is missing.");
                     }
-                    int taskNumber = Integer.parseInt(parts.get(1));
-                    if (taskNumber < 1 || taskNumber > listInputs.size()) {
-                        throw new ArrayIndexOutOfBoundsException("Task number is out of range.");
-                    }
-                    Task removedTask = listInputs.remove(taskNumber - 1);
+                    int taskNum = Integer.parseInt(parts.get(1));
+                    Task removedTask = this.list.removeTask(taskNum - 1);
                     printDivider();
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removedTask);
-                    System.out.println("Now you have " + listInputs.size() + " tasks in the list.");
+                    System.out.println("Now you have " + this.list.getSize() + " tasks in the list.");
                     printDivider();
                 } catch (MissingParameterException e) {
                     printDivider();
@@ -337,7 +322,7 @@ public class Jinjja {
         userInput.close();
         printDivider();
         try {
-            storage.saveTasksToFile(listInputs);
+            storage.saveTasksToFile(this.list.getTasks());
         } catch (IOException e) {
             System.err.println("Error saving tasks to file: " + e.getMessage());
         }
