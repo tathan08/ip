@@ -23,12 +23,6 @@ class TaskList {
         return this.tasks;
     }
 
-    public void printTasks() {
-        for (int i = 0; i < this.getSize(); i++) {
-            System.out.println((i + 1) + "." + this.getTask(i));
-        }
-    }
-
     public void addTask(Task task) {
         this.tasks.add(task);
     }
