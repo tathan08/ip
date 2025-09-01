@@ -1,3 +1,5 @@
+package jinjja.storage;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -6,7 +8,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-class Storage {
+import jinjja.task.Deadline;
+import jinjja.task.Event;
+import jinjja.task.Task;
+import jinjja.task.Todo;
+
+/**
+ * Handles the storage and retrieval of tasks from a file.
+ */
+public class Storage {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private String filePath;

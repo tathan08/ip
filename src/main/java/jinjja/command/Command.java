@@ -1,7 +1,13 @@
+package jinjja.command;
+
+import jinjja.storage.Storage;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
+
 /**
  * Represents an abstract command that can be executed. All specific command types inherit from this class.
  */
-abstract class Command {
+public abstract class Command {
 
     /**
      * Executes the command with the given dependencies.

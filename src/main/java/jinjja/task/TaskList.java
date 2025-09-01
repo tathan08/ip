@@ -1,6 +1,11 @@
+package jinjja.task;
+
 import java.util.ArrayList;
 
-class TaskList {
+/**
+ * Manages a list of tasks. Provides operations to add, remove, mark, and query tasks.
+ */
+public class TaskList {
     private ArrayList<Task> tasks;
 
     public TaskList() {

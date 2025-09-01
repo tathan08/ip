@@ -1,4 +1,12 @@
+package jinjja;
+
 import java.io.IOException;
+
+import jinjja.command.Command;
+import jinjja.parser.Parser;
+import jinjja.storage.Storage;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
 
 /**
  * Jinjja is a personal assistant chatbot that helps users manage their tasks. It supports adding, listing, marking,

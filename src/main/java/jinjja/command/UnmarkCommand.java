@@ -1,18 +1,24 @@
+package jinjja.command;
+
+import jinjja.storage.Storage;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
+
 /**
- * Command to delete a task.
+ * Command to unmark a task (mark as not done).
  */
-class DeleteCommand extends Command {
+public class UnmarkCommand extends Command {
     private int taskNumber;
 
-    public DeleteCommand(int taskNumber) {
+    public UnmarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
     }
 
     @Override
     public void execute(TaskList tasks, Storage storage, Ui ui) {
         try {
-            Task removedTask = tasks.removeTask(taskNumber - 1);
-            ui.showTaskDeleted(removedTask, tasks.getSize());
+            tasks.markTask(false, taskNumber - 1);
+            ui.showTaskUnmarked(tasks.getTask(taskNumber - 1));
         } catch (ArrayIndexOutOfBoundsException e) {
             ui.showMessageWithDivider(e.getMessage());
         }

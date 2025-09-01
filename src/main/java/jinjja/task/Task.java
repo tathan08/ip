@@ -1,4 +1,9 @@
-class Task {
+package jinjja.task;
+
+/**
+ * Represents a task with a description and completion status.
+ */
+public class Task {
     private boolean isDone;
     private String description;
 

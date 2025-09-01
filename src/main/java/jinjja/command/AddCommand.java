@@ -1,7 +1,14 @@
+package jinjja.command;
+
+import jinjja.storage.Storage;
+import jinjja.task.Task;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
+
 /**
  * Command to add a task.
  */
-class AddCommand extends Command {
+public class AddCommand extends Command {
     private Task task;
 
     public AddCommand(Task task) {

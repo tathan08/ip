@@ -1,7 +1,12 @@
+package jinjja.task;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-class Event extends Task {
+/**
+ * Represents an event task with a specific start and end date/time.
+ */
+public class Event extends Task {
     private static final DateTimeFormatter DATETIME_OUTPUT = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -17,12 +22,12 @@ class Event extends Task {
     @Override
     public String toFileFormat() {
         return "E | " + super.toFileFormat() + " | " + this.from.format(DATETIME_FILE) + " | "
-                                        + this.to.format(DATETIME_FILE);
+                + this.to.format(DATETIME_FILE);
     }
 
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + this.from.format(DATETIME_OUTPUT) + " to: "
-                                        + this.to.format(DATETIME_OUTPUT) + ")";
+                + this.to.format(DATETIME_OUTPUT) + ")";
     }
 }
