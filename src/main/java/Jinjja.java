@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.util.Scanner;
 
 /**
  * Jinjja is a personal assistant chatbot that helps users manage their tasks. It supports adding, listing, marking,
@@ -11,37 +10,17 @@ public class Jinjja {
 
     private Storage storage;
     private TaskList list;
+    private Ui ui;
 
     public Jinjja() {
+        this.ui = new Ui();
         this.storage = new Storage(DATA_FILE_PATH);
         try {
             this.list = new TaskList(this.storage.loadTasksFromFile());
         } catch (IOException e) {
-            System.err.println("Error loading tasks from file: " + e.getMessage());
+            this.ui.showError("Error loading tasks from file: " + e.getMessage());
             this.list = new TaskList();
         }
-    }
-
-    /**
-     * Prints a greeting message to the user.
-     */
-    public static void printGreeting() {
-        System.out.println("Hello! I'm Jinjja");
-        System.out.println("What can I do for you?");
-    }
-
-    /**
-     * Prints a farewell message to the user.
-     */
-    public static void printFarewell() {
-        System.out.println("Bye. Hope to see you again soon!");
-    }
-
-    /**
-     * Prints a divider line. Used before and after bot replies.
-     */
-    public static void printDivider() {
-        System.out.println("____________________________________________________________");
     }
 
     /**
@@ -49,28 +28,27 @@ public class Jinjja {
      */
     public void run() {
         // Greet user
-        printDivider();
-        printGreeting();
-        printDivider();
+        this.ui.showDivider();
+        this.ui.showGreeting();
+        this.ui.showDivider();
 
         // Loop to handle user input
-        Scanner userInput = new Scanner(System.in);
         boolean canExit = false;
         while (!canExit) {
-            String fullCommand = userInput.nextLine();
+            String fullCommand = this.ui.readCommand();
             Command c = Parser.parse(fullCommand);
-            c.execute(this.list, this.storage);
+            c.execute(this.list, this.storage, this.ui);
             canExit = c.canExit();
         }
-        userInput.close();
-        printDivider();
+        this.ui.close();
+        this.ui.showDivider();
         try {
             storage.saveTasksToFile(this.list.getTasks());
         } catch (IOException e) {
-            System.err.println("Error saving tasks to file: " + e.getMessage());
+            this.ui.showError("Error saving tasks to file: " + e.getMessage());
         }
-        printFarewell();
-        printDivider();
+        this.ui.showFarewell();
+        this.ui.showDivider();
     }
 
     public static void main(String[] args) {
