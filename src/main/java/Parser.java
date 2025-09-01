@@ -4,8 +4,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 /**
- * Parser deals with making sense of the user command.
- * It parses user input and returns appropriate Command objects.
+ * Parser deals with making sense of the user command. It parses user input and returns appropriate Command objects.
  */
 class Parser {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -27,25 +26,27 @@ class Parser {
             return new InvalidCommand("Empty command");
         }
 
-        String action = parts.get(0).toLowerCase();
+        String action = parts.get(0);
+        CommandType commandType = CommandType.fromString(action);
 
-        switch (action) {
-        case "bye":
+        switch (commandType) {
+        case BYE:
             return new ExitCommand();
-        case "list":
+        case LIST:
             return new ListCommand();
-        case "mark":
+        case MARK:
             return parseMarkCommand(parts);
-        case "unmark":
+        case UNMARK:
             return parseUnmarkCommand(parts);
-        case "todo":
+        case TODO:
             return parseTodoCommand(parts);
-        case "deadline":
+        case DEADLINE:
             return parseDeadlineCommand(parts);
-        case "event":
+        case EVENT:
             return parseEventCommand(parts);
-        case "delete":
+        case DELETE:
             return parseDeleteCommand(parts);
+        case UNKNOWN:
         default:
             return new InvalidCommand("I have no clue what you just said. Please use a command I know.");
         }
