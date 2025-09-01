@@ -1,18 +1,24 @@
+package jinjja.command;
+
+import jinjja.storage.Storage;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
+
 /**
- * Command to unmark a task (mark as not done).
+ * Command to mark a task as done.
  */
-class UnmarkCommand extends Command {
+public class MarkCommand extends Command {
     private int taskNumber;
 
-    public UnmarkCommand(int taskNumber) {
+    public MarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
     }
 
     @Override
     public void execute(TaskList tasks, Storage storage, Ui ui) {
         try {
-            tasks.markTask(false, taskNumber - 1);
-            ui.showTaskUnmarked(tasks.getTask(taskNumber - 1));
+            tasks.markTask(true, taskNumber - 1);
+            ui.showTaskMarked(tasks.getTask(taskNumber - 1));
         } catch (ArrayIndexOutOfBoundsException e) {
             ui.showMessageWithDivider(e.getMessage());
         }

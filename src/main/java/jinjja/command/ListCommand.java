@@ -1,7 +1,13 @@
+package jinjja.command;
+
+import jinjja.storage.Storage;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
+
 /**
  * Command to list all tasks.
  */
-class ListCommand extends Command {
+public class ListCommand extends Command {
 
     @Override
     public void execute(TaskList tasks, Storage storage, Ui ui) {

@@ -1,7 +1,13 @@
+package jinjja.command;
+
+import jinjja.storage.Storage;
+import jinjja.task.TaskList;
+import jinjja.ui.Ui;
+
 /**
  * Command representing an invalid or erroneous command.
  */
-class InvalidCommand extends Command {
+public class InvalidCommand extends Command {
     private String errorMessage;
 
     public InvalidCommand(String errorMessage) {

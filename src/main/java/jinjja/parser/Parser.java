@@ -1,12 +1,27 @@
+package jinjja.parser;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
+import jinjja.command.AddCommand;
+import jinjja.command.Command;
+import jinjja.command.DeleteCommand;
+import jinjja.command.ExitCommand;
+import jinjja.command.InvalidCommand;
+import jinjja.command.ListCommand;
+import jinjja.command.MarkCommand;
+import jinjja.command.UnmarkCommand;
+import jinjja.task.Deadline;
+import jinjja.task.Event;
+import jinjja.task.Task;
+import jinjja.task.Todo;
+
 /**
  * Parser deals with making sense of the user command. It parses user input and returns appropriate Command objects.
  */
-class Parser {
+public class Parser {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**

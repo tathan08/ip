@@ -1,7 +1,12 @@
+package jinjja.task;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-class Deadline extends Task {
+/**
+ * Represents a deadline task with a specific date and time to be completed by.
+ */
+public class Deadline extends Task {
     private static final DateTimeFormatter DATETIME_OUTPUT = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 

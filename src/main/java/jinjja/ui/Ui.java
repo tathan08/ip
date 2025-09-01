@@ -1,9 +1,14 @@
+package jinjja.ui;
+
 import java.util.Scanner;
+
+import jinjja.task.Task;
+import jinjja.task.TaskList;
 
 /**
  * Handles user interface operations including printing messages and reading user input.
  */
-class Ui {
+public class Ui {
     private Scanner scanner;
 
     public Ui() {
