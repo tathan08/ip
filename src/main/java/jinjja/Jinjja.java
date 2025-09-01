@@ -14,7 +14,7 @@ import jinjja.ui.Ui;
  * via command-line interface.
  */
 public class Jinjja {
-    private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
+    private static final String DATA_FILE_PATH = "data/jinjja.txt";
 
     private Storage storage;
     private TaskList list;
