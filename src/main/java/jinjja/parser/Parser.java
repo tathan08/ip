@@ -69,7 +69,10 @@ public class Parser {
     }
 
     /**
-     * Parses a mark command.
+     * Parses a mark command from the input parts.
+     *
+     * @param parts The input split into parts
+     * @return A MarkCommand if valid, InvalidCommand otherwise
      */
     private static Command parseMarkCommand(ArrayList<String> parts) {
         if (parts.size() <= 1) {
@@ -84,7 +87,10 @@ public class Parser {
     }
 
     /**
-     * Parses an unmark command.
+     * Parses an unmark command from the input parts.
+     *
+     * @param parts The input split into parts
+     * @return An UnmarkCommand if valid, InvalidCommand otherwise
      */
     private static Command parseUnmarkCommand(ArrayList<String> parts) {
         if (parts.size() <= 1) {
@@ -99,7 +105,10 @@ public class Parser {
     }
 
     /**
-     * Parses a todo command.
+     * Parses a todo command from the input parts.
+     *
+     * @param parts The input split into parts
+     * @return An AddCommand with a Todo task if valid, InvalidCommand otherwise
      */
     private static Command parseTodoCommand(ArrayList<String> parts) {
         if (parts.size() <= 1) {

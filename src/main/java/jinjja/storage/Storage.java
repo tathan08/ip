@@ -14,22 +14,29 @@ import jinjja.task.Task;
 import jinjja.task.Todo;
 
 /**
- * Handles the storage and retrieval of tasks from a file.
+ * Handles the storage and retrieval of tasks from a file. This class provides functionality to save tasks to a file and
+ * load them back, maintaining data persistence across application sessions.
  */
 public class Storage {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private String filePath;
 
+    /**
+     * Constructs a Storage object with the specified file path.
+     *
+     * @param filePath The path to the file where tasks will be stored
+     */
     public Storage(String filePath) {
         this.filePath = filePath;
     }
 
     /**
-     * Saves the list of tasks to a file.
+     * Saves the list of tasks to a file in a specific format. Creates the data directory if it doesn't exist.
+     * Overwrites existing file content.
      *
-     * @param tasks The list of tasks to save.
-     * @throws IOException If an error occurs while saving tasks to the file.
+     * @param tasks The list of tasks to save
+     * @throws IOException If an error occurs while saving tasks to the file
      */
     public void saveTasksToFile(ArrayList<Task> tasks) throws IOException {
         // Create directory if it doesn't exist
@@ -50,10 +57,11 @@ public class Storage {
     }
 
     /**
-     * Loads tasks in-place from the specified DATA_FILE_PATH.
+     * Loads tasks from the specified file path. If the file doesn't exist, returns an empty list. Parses each line to
+     * recreate Todo, Deadline, and Event tasks.
      *
-     * @return tasks The list of tasks that was loaded.
-     * @throws IOException If an error occurs while reading the file.
+     * @return The list of tasks loaded from the file
+     * @throws IOException If an error occurs while reading the file
      */
     public ArrayList<Task> loadTasksFromFile() throws IOException {
         File dataFile = new File(this.filePath);
