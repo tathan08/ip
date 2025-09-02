@@ -9,6 +9,7 @@ import jinjja.command.AddCommand;
 import jinjja.command.Command;
 import jinjja.command.DeleteCommand;
 import jinjja.command.ExitCommand;
+import jinjja.command.FindCommand;
 import jinjja.command.InvalidCommand;
 import jinjja.command.ListCommand;
 import jinjja.command.MarkCommand;
@@ -61,6 +62,8 @@ public class Parser {
             return parseEventCommand(parts);
         case DELETE:
             return parseDeleteCommand(parts);
+        case FIND:
+            return parseFindCommand(parts);
         case UNKNOWN:
         default:
             return new InvalidCommand("I have no clue what you just said. Please use a command I know.");
@@ -239,5 +242,28 @@ public class Parser {
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
         }
+    }
+
+    /**
+     * Parses a find command from the input parts.
+     *
+     * @param parts The input split into parts
+     * @return A FindCommand if valid, InvalidCommand otherwise
+     */
+    private static Command parseFindCommand(ArrayList<String> parts) {
+        if (parts.size() <= 1) {
+            return new InvalidCommand("Search keyword is missing.");
+        }
+
+        // Build keyword from remaining parts (in case the keyword has multiple words)
+        StringBuilder keywordBuilder = new StringBuilder();
+        for (int i = 1; i < parts.size(); i++) {
+            keywordBuilder.append(parts.get(i));
+            if (i < parts.size() - 1) {
+                keywordBuilder.append(" ");
+            }
+        }
+
+        return new FindCommand(keywordBuilder.toString());
     }
 }
