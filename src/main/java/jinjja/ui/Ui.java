@@ -132,6 +132,25 @@ public class Ui {
     }
 
     /**
+     * Shows the results of a find operation.
+     *
+     * @param matchingTasks The task list containing tasks that match the search criteria
+     * @param keyword The keyword that was searched for
+     */
+    public void showFindResults(TaskList matchingTasks, String keyword) {
+        showDivider();
+        if (matchingTasks.isEmpty()) {
+            showMessage("No matching tasks found for keyword: " + keyword);
+        } else {
+            showMessage("Here are the matching tasks in your list:");
+            for (int i = 0; i < matchingTasks.getSize(); i++) {
+                showMessage((i + 1) + "." + matchingTasks.getTask(i));
+            }
+        }
+        showDivider();
+    }
+
+    /**
      * Reads a line of input from the user.
      *
      * @return The user's input as a string.

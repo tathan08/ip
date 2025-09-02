@@ -4,7 +4,7 @@ package jinjja.parser;
  * Enum representing the different types of commands that the application can handle.
  */
 public enum CommandType {
-    BYE, LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, UNKNOWN;
+    BYE, LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE, FIND, UNKNOWN;
 
     /**
      * Converts a string input to the corresponding CommandType enum.
