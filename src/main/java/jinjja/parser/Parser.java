@@ -64,7 +64,7 @@ public class Parser {
             return parseDeleteCommand(parts);
         case FIND:
             return parseFindCommand(parts);
-        case UNKNOWN: 
+        case UNKNOWN:
             // Fallthrough
         default:
             return new InvalidCommand("I have no clue what you just said. Please use a command I know.");

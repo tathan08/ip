@@ -13,6 +13,13 @@ public class Event extends Task {
     private LocalDateTime from;
     private LocalDateTime to;
 
+    /**
+     * Constructs a new Event task with a start and end time.
+     *
+     * @param description
+     * @param from
+     * @param to
+     */
     public Event(String description, LocalDateTime from, LocalDateTime to) {
         super(description);
         this.from = from;

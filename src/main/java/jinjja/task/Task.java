@@ -49,7 +49,7 @@ public class Task {
 
     /**
      * Converts the task to a format suitable for saving to a file.
-     * 
+     *
      * @return A string representation of the task in file format.
      */
     public String toFileFormat() {

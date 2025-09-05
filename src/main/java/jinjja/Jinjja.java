@@ -20,6 +20,11 @@ public class Jinjja {
     private TaskList list;
     private Ui ui;
 
+    /**
+     * Constructor for the Jinjja chatbot.
+     * Separates UI, Storage, and TaskList components.
+     * Creates new TaskList file if there are errors loading the current one in Storage.
+     */
     public Jinjja() {
         this.ui = new Ui();
         this.storage = new Storage(DATA_FILE_PATH);
