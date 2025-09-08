@@ -62,11 +62,11 @@ public class Gui implements Ui {
     }
 
     /**
-     * Divider is not needed for GUI, so this returns an empty string.
+     * Divider is not needed for GUI, so this returns just the message without dividers.
      */
     @Override
     public String showMessageWithDivider(String message) {
-        return "";
+        return message;
     }
 
     /**
