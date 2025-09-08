@@ -21,11 +21,16 @@ public class Jinjja {
     private Ui ui;
 
     /**
-     * Constructor for the Jinjja chatbot. Separates UI, Storage, and TaskList components. Creates new TaskList file if
-     * there are errors loading the current one in Storage.
+     * Constructor for the Jinjja chatbot.
+     * Separates UI, Storage, and TaskList components.
+     * Creates new TaskList file if there are errors loading the current one in Storage.
+     *
+     * @param isGui true if the UI is graphical, false for command-line interface
      */
-    public Jinjja() {
-        this.ui = new Ui();
+    public Jinjja(boolean isGui) {
+        if (!isGui) {
+            this.ui = new Ui();
+        }
     }
 
     /**
@@ -66,7 +71,8 @@ public class Jinjja {
     }
 
     public static void main(String[] args) {
-        new Jinjja().run();
+        // Set isGui to false for CLI, true for GUI
+        new Jinjja(false).run();
     }
 
     /**

@@ -15,7 +15,7 @@ import jinjja.javafxui.window.MainWindow;
  */
 public class JavaFxUi extends Application {
 
-    private Jinjja jinjja = new Jinjja();
+    private Jinjja jinjja = new Jinjja(true);
 
     @Override
     public void start(Stage stage) {
