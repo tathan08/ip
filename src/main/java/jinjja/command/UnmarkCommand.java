@@ -15,12 +15,12 @@ public class UnmarkCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
         try {
             tasks.markTask(false, taskNumber - 1);
-            ui.showTaskUnmarked(tasks.getTask(taskNumber - 1));
+            return ui.showTaskUnmarked(tasks.getTask(taskNumber - 1));
         } catch (ArrayIndexOutOfBoundsException e) {
-            ui.showMessageWithDivider(e.getMessage());
+            return ui.showMessageWithDivider(e.getMessage());
         }
     }
 

@@ -30,7 +30,7 @@ public class FindCommand extends Command {
      * @param ui The user interface for displaying the search results
      */
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
         TaskList matchingTasks = new TaskList();
 
         // Search through all tasks for the keyword
@@ -42,7 +42,7 @@ public class FindCommand extends Command {
         }
 
         // Display the results
-        ui.showFindResults(matchingTasks, keyword);
+        return ui.showFindResults(matchingTasks, keyword);
     }
 
     @Override

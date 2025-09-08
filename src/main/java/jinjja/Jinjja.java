@@ -6,12 +6,15 @@ import jinjja.command.Command;
 import jinjja.parser.Parser;
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
+import jinjja.ui.Cli;
+import jinjja.ui.Gui;
 import jinjja.ui.Ui;
 
 /**
- * Jinjja is a personal assistant chatbot that helps users manage their tasks. It supports adding, listing, marking,
- * unmarking, and deleting tasks. Tasks can be of three types: Todo, Deadline, and Event. The bot interacts with users
- * via command-line interface.
+ * Jinjja is a personal assistant chatbot that helps users manage their tasks.
+ * It supports adding, listing, marking, unmarking, and deleting tasks.
+ * Tasks can be of three types: Todo, Deadline, and Event.
+ * The bot can interact with users via GUI or command-line interface.
  */
 public class Jinjja {
     private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
@@ -23,10 +26,28 @@ public class Jinjja {
     /**
      * Constructor for the Jinjja chatbot.
      * Separates UI, Storage, and TaskList components.
-     * Creates new TaskList file if there are errors loading the current one in Storage.
+     * Creates new TaskList file if there are errors loading the current one in
+     * Storage.
+     *
+     * @param isGui true if the UI is graphical, false for command-line interface
      */
-    public Jinjja() {
-        this.ui = new Ui();
+    public Jinjja(boolean isGui) {
+        if (isGui) {
+            this.ui = new Gui();
+        } else {
+            this.ui = new Cli();
+        }
+    }
+
+    /**
+     * Runs the main logic of the Jinjja chatbot for CLI.
+     */
+    public void run() {
+        // Greet user
+        this.ui.showDivider();
+        this.ui.showGreeting();
+
+        // Initialize storage and load existing tasks
         this.storage = new Storage(DATA_FILE_PATH);
         try {
             this.list = new TaskList(this.storage.loadTasksFromFile());
@@ -34,15 +55,6 @@ public class Jinjja {
             this.ui.showError("Error loading tasks from file: " + e.getMessage());
             this.list = new TaskList();
         }
-    }
-
-    /**
-     * Runs the main logic of the Jinjja chatbot.
-     */
-    public void run() {
-        // Greet user
-        this.ui.showDivider();
-        this.ui.showGreeting();
         this.ui.showDivider();
 
         // Loop to handle user input
@@ -65,6 +77,25 @@ public class Jinjja {
     }
 
     public static void main(String[] args) {
-        new Jinjja().run();
+        // Set isGui to false for CLI, true for GUI
+        new Jinjja(false).run();
+    }
+
+    /**
+     * Parses and executes a command for the GUI, returning the output string.
+     */
+    public String getResponse(String input) {
+        if (this.storage == null) {
+            this.storage = new Storage(DATA_FILE_PATH);
+        }
+        if (this.list == null) {
+            try {
+                this.list = new TaskList(this.storage.loadTasksFromFile());
+            } catch (IOException e) {
+                this.list = new TaskList();
+            }
+        }
+        Command c = Parser.parse(input);
+        return c.execute(this.list, this.storage, this.ui);
     }
 }

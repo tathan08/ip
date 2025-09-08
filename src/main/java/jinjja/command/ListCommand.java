@@ -18,8 +18,8 @@ public class ListCommand extends Command {
      * @param ui The user interface for displaying the task list
      */
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
-        ui.showTaskList(tasks);
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
+        return ui.showTaskList(tasks);
     }
 
     /**

@@ -16,12 +16,12 @@ public class DeleteCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
         try {
             Task removedTask = tasks.removeTask(taskNumber - 1);
-            ui.showTaskDeleted(removedTask, tasks.getSize());
+            return ui.showTaskDeleted(removedTask, tasks.getSize());
         } catch (ArrayIndexOutOfBoundsException e) {
-            ui.showMessageWithDivider(e.getMessage());
+            return ui.showMessageWithDivider(e.getMessage());
         }
     }
 

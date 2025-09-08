@@ -10,8 +10,9 @@ import jinjja.ui.Ui;
 public class ExitCommand extends Command {
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
-        // No action needed for exit command
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
+        // No output needed for exit command
+        return ui.showFarewell();
     }
 
     @Override
