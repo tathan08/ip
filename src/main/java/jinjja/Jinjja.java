@@ -21,19 +21,11 @@ public class Jinjja {
     private Ui ui;
 
     /**
-     * Constructor for the Jinjja chatbot.
-     * Separates UI, Storage, and TaskList components.
-     * Creates new TaskList file if there are errors loading the current one in Storage.
+     * Constructor for the Jinjja chatbot. Separates UI, Storage, and TaskList components. Creates new TaskList file if
+     * there are errors loading the current one in Storage.
      */
     public Jinjja() {
         this.ui = new Ui();
-        this.storage = new Storage(DATA_FILE_PATH);
-        try {
-            this.list = new TaskList(this.storage.loadTasksFromFile());
-        } catch (IOException e) {
-            this.ui.showError("Error loading tasks from file: " + e.getMessage());
-            this.list = new TaskList();
-        }
     }
 
     /**
@@ -43,6 +35,15 @@ public class Jinjja {
         // Greet user
         this.ui.showDivider();
         this.ui.showGreeting();
+
+        // Initialize storage and load existing tasks
+        this.storage = new Storage(DATA_FILE_PATH);
+        try {
+            this.list = new TaskList(this.storage.loadTasksFromFile());
+        } catch (IOException e) {
+            this.ui.showError("Error loading tasks from file: " + e.getMessage());
+            this.list = new TaskList();
+        }
         this.ui.showDivider();
 
         // Loop to handle user input
