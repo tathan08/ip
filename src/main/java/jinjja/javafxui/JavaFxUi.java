@@ -85,8 +85,8 @@ public class JavaFxUi extends Application {
         String userText = userInput.getText();
         String jinjjaText = jinjja.getResponse(userText);
         dialogContainer.getChildren().addAll(
-            new DialogBox(userInput.getText(), userImage),
-            new DialogBox(jinjjaText, jinjjaImage)
+            DialogBox.getUserDialog(userInput.getText(), userImage),
+            DialogBox.getJinjjaDialog(jinjjaText, jinjjaImage)
         );
         userInput.clear();
     }
