@@ -8,6 +8,7 @@ import jinjja.storage.Storage;
 import jinjja.task.TaskList;
 import jinjja.ui.Cli;
 import jinjja.ui.Gui;
+import jinjja.ui.Ui;
 
 /**
  * Jinjja is a personal assistant chatbot that helps users manage their tasks.
@@ -20,8 +21,7 @@ public class Jinjja {
 
     private Storage storage;
     private TaskList list;
-    private Cli cli;
-    private Gui gui;
+    private Ui ui;
 
     /**
      * Constructor for the Jinjja chatbot.
@@ -33,47 +33,47 @@ public class Jinjja {
      */
     public Jinjja(boolean isGui) {
         if (isGui) {
-            this.gui = new Gui();
+            this.ui = new Gui();
         } else {
-            this.cli = new Cli();
+            this.ui = new Cli();
         }
     }
 
     /**
-     * Runs the main logic of the Jinjja chatbot.
+     * Runs the main logic of the Jinjja chatbot for CLI.
      */
     public void run() {
         // Greet user
-        this.cli.showDivider();
-        this.cli.showGreeting();
+        this.ui.showDivider();
+        this.ui.showGreeting();
 
         // Initialize storage and load existing tasks
         this.storage = new Storage(DATA_FILE_PATH);
         try {
             this.list = new TaskList(this.storage.loadTasksFromFile());
         } catch (IOException e) {
-            this.cli.showError("Error loading tasks from file: " + e.getMessage());
+            this.ui.showError("Error loading tasks from file: " + e.getMessage());
             this.list = new TaskList();
         }
-        this.cli.showDivider();
+        this.ui.showDivider();
 
         // Loop to handle user input
         boolean canExit = false;
         while (!canExit) {
-            String fullCommand = this.cli.readCommand();
+            String fullCommand = this.ui.readCommand();
             Command c = Parser.parse(fullCommand);
-            c.execute(this.list, this.storage, this.cli);
+            c.execute(this.list, this.storage, this.ui);
             canExit = c.canExit();
         }
-        this.cli.close();
-        this.cli.showDivider();
+        this.ui.close();
+        this.ui.showDivider();
         try {
             storage.saveTasksToFile(this.list.getTasks());
         } catch (IOException e) {
-            this.cli.showError("Error saving tasks to file: " + e.getMessage());
+            this.ui.showError("Error saving tasks to file: " + e.getMessage());
         }
-        this.cli.showFarewell();
-        this.cli.showDivider();
+        this.ui.showFarewell();
+        this.ui.showDivider();
     }
 
     public static void main(String[] args) {
@@ -95,11 +95,7 @@ public class Jinjja {
                 this.list = new TaskList();
             }
         }
-        if (this.gui == null) {
-            this.gui = new Gui();
-        }
         Command c = Parser.parse(input);
-        // return c.execute(this.list, this.storage, this.cli);
-        return ""; // Placeholder return statement
+        return c.execute(this.list, this.storage, this.ui);
     }
 }

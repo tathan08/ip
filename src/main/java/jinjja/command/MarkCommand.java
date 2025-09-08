@@ -2,7 +2,7 @@ package jinjja.command;
 
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
-import jinjja.ui.Cli;
+import jinjja.ui.Ui;
 
 /**
  * Command to mark a task as done.
@@ -15,12 +15,12 @@ public class MarkCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Cli cli) {
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
         try {
             tasks.markTask(true, taskNumber - 1);
-            cli.showTaskMarked(tasks.getTask(taskNumber - 1));
+            return ui.showTaskMarked(tasks.getTask(taskNumber - 1));
         } catch (ArrayIndexOutOfBoundsException e) {
-            cli.showMessageWithDivider(e.getMessage());
+            return ui.showMessageWithDivider(e.getMessage());
         }
     }
 

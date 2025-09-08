@@ -2,7 +2,7 @@ package jinjja.command;
 
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
-import jinjja.ui.Cli;
+import jinjja.ui.Ui;
 
 /**
  * Represents an abstract command that can be executed. All specific command types inherit from this class.
@@ -14,9 +14,9 @@ public abstract class Command {
      *
      * @param tasks The task list to operate on.
      * @param storage The storage for saving tasks.
-     * @param cli The user interface for displaying messages.
+     * @param ui The user interface for displaying messages.
      */
-    public abstract void execute(TaskList tasks, Storage storage, Cli cli);
+    public abstract String execute(TaskList tasks, Storage storage, Ui ui);
 
     /**
      * Returns whether the application should exit after executing this command.

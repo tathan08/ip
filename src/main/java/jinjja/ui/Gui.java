@@ -16,6 +16,7 @@ public class Gui implements Ui {
      *
      * @return The greeting message.
      */
+    @Override
     public String showGreeting() {
         return "Hello! I'm Jinjja\nWhat can I do for you?";
     }
@@ -25,11 +26,18 @@ public class Gui implements Ui {
      *
      * @return The farewell message.
      */
+    @Override
     public String showFarewell() {
         return "Bye. Hope to see you again soon!";
     }
 
-    // showDivider(), no divider needed for GUI
+    /**
+     * Divider is not needed for GUI, so this returns an empty string.
+     */
+    @Override
+    public String showDivider() {
+        return "";
+    }
 
     /**
      * Returns a message to the user.
@@ -37,6 +45,7 @@ public class Gui implements Ui {
      * @param message The message to return.
      * @return The message string.
      */
+    @Override
     public String showMessage(String message) {
         return message;
     }
@@ -47,11 +56,18 @@ public class Gui implements Ui {
      * @param errorMessage The error message to return.
      * @return The error message string.
      */
+    @Override
     public String showError(String errorMessage) {
         return "Error: " + errorMessage;
     }
 
-    // showMessageWithDivider(), no divider needed for GUI
+    /**
+     * Divider is not needed for GUI, so this returns an empty string.
+     */
+    @Override
+    public String showMessageWithDivider(String message) {
+        return "";
+    }
 
     /**
      * Returns a task addition confirmation message.
@@ -60,6 +76,7 @@ public class Gui implements Ui {
      * @param totalTasks The total number of tasks after adding.
      * @return The confirmation message.
      */
+    @Override
     public String showTaskAdded(Task task, int totalTasks) {
         return "Got it. I've added this task:\n  " + task + "\nNow you have " + totalTasks + " tasks in the list.";
     }
@@ -71,6 +88,7 @@ public class Gui implements Ui {
      * @param totalTasks The total number of tasks after removal.
      * @return The confirmation message.
      */
+    @Override
     public String showTaskDeleted(Task task, int totalTasks) {
         return "Noted. I've removed this task:\n  " + task + "\nNow you have " + totalTasks + " tasks in the list.";
     }
@@ -81,6 +99,7 @@ public class Gui implements Ui {
      * @param task The task that was marked.
      * @return The confirmation message.
      */
+    @Override
     public String showTaskMarked(Task task) {
         return "Nice! I've marked this task as done:\n  " + task;
     }
@@ -91,6 +110,7 @@ public class Gui implements Ui {
      * @param task The task that was unmarked.
      * @return The confirmation message.
      */
+    @Override
     public String showTaskUnmarked(Task task) {
         return "OK, I've marked this task as not done yet:\n  " + task;
     }
@@ -101,6 +121,7 @@ public class Gui implements Ui {
      * @param tasks The task list to display.
      * @return The formatted task list string.
      */
+    @Override
     public String showTaskList(TaskList tasks) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tasks.getSize(); i++) {
@@ -116,6 +137,7 @@ public class Gui implements Ui {
      * @param keyword The keyword that was searched for.
      * @return The formatted find results string.
      */
+    @Override
     public String showFindResults(TaskList matchingTasks, String keyword) {
         StringBuilder sb = new StringBuilder();
         if (matchingTasks.isEmpty()) {
@@ -127,5 +149,24 @@ public class Gui implements Ui {
             }
         }
         return sb.toString().trim();
+    }
+
+    /**
+     * Reads a line of input from the user. Not applicable for GUI, so returns an empty string.
+     *
+     * @return An empty string.
+     */
+    @Override
+    public String readCommand() {
+        // Not applicable for GUI, return empty string
+        return "";
+    }
+
+    /**
+     * Nothing to close for GUI, so this method does nothing.
+     */
+    @Override
+    public void close() {
+        // No resources to close for GUI
     }
 }

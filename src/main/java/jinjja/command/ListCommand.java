@@ -2,7 +2,7 @@ package jinjja.command;
 
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
-import jinjja.ui.Cli;
+import jinjja.ui.Ui;
 
 /**
  * Command to display all tasks in the task list. This command shows the user all their current tasks with their
@@ -15,11 +15,11 @@ public class ListCommand extends Command {
      *
      * @param tasks The task list to display
      * @param storage The storage system (not used in this command)
-     * @param cli The user interface for displaying the task list
+     * @param ui The user interface for displaying the task list
      */
     @Override
-    public void execute(TaskList tasks, Storage storage, Cli cli) {
-        cli.showTaskList(tasks);
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
+        return ui.showTaskList(tasks);
     }
 
     /**

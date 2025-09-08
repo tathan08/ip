@@ -3,7 +3,7 @@ package jinjja.command;
 import jinjja.storage.Storage;
 import jinjja.task.Task;
 import jinjja.task.TaskList;
-import jinjja.ui.Cli;
+import jinjja.ui.Ui;
 
 /**
  * Command to find tasks that contain a specific keyword in their description. This command searches through all tasks
@@ -27,10 +27,10 @@ public class FindCommand extends Command {
      *
      * @param tasks The task list to search through
      * @param storage The storage system (not used in this command)
-     * @param cli The user interface for displaying the search results
+     * @param ui The user interface for displaying the search results
      */
     @Override
-    public void execute(TaskList tasks, Storage storage, Cli cli) {
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
         TaskList matchingTasks = new TaskList();
 
         // Search through all tasks for the keyword
@@ -42,7 +42,7 @@ public class FindCommand extends Command {
         }
 
         // Display the results
-        cli.showFindResults(matchingTasks, keyword);
+        return ui.showFindResults(matchingTasks, keyword);
     }
 
     @Override

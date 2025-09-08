@@ -17,53 +17,74 @@ public class Cli implements Ui {
 
     /**
      * Prints a greeting message to the user.
+     *
+     * @return An empty string.
      */
-    public void showGreeting() {
+    @Override
+    public String showGreeting() {
         System.out.println("Hello! I'm Jinjja");
         System.out.println("What can I do for you?");
+        return "";
     }
 
     /**
      * Prints a farewell message to the user.
+     *
+     * @return An empty string.
      */
-    public void showFarewell() {
+    @Override
+    public String showFarewell() {
         System.out.println("Bye. Hope to see you again soon!");
+        return "";
     }
 
     /**
      * Prints a divider line. Used before and after bot replies.
+     *
+     * @return An empty string.
      */
-    public void showDivider() {
+    @Override
+    public String showDivider() {
         System.out.println("____________________________________________________________");
+        return "";
     }
 
     /**
      * Prints a message to the user.
      *
      * @param message The message to print.
+     * @return An empty string.
      */
-    public void showMessage(String message) {
+    @Override
+    public String showMessage(String message) {
         System.out.println(message);
+        return "";
     }
 
     /**
      * Prints an error message to the user.
      *
      * @param errorMessage The error message to print.
+     * @return An empty string.
      */
-    public void showError(String errorMessage) {
+    @Override
+    public String showError(String errorMessage) {
         System.err.println(errorMessage);
+        return "";
     }
 
     /**
      * Prints a message with dividers around it.
      *
      * @param message The message to print.
+     * @return An empty string.
      */
-    public void showMessageWithDivider(String message) {
+    @Override
+    public String showMessageWithDivider(String message) {
         showDivider();
         showMessage(message);
         showDivider();
+        return "";
     }
 
     /**
@@ -71,13 +92,16 @@ public class Cli implements Ui {
      *
      * @param task The task that was added.
      * @param totalTasks The total number of tasks after adding.
+     * @return An empty string.
      */
-    public void showTaskAdded(Task task, int totalTasks) {
+    @Override
+    public String showTaskAdded(Task task, int totalTasks) {
         showDivider();
         showMessage("Got it. I've added this task:");
         showMessage("  " + task);
         showMessage("Now you have " + totalTasks + " tasks in the list.");
         showDivider();
+        return "";
     }
 
     /**
@@ -85,50 +109,62 @@ public class Cli implements Ui {
      *
      * @param task The task that was removed.
      * @param totalTasks The total number of tasks after removal.
+     * @return An empty string.
      */
-    public void showTaskDeleted(Task task, int totalTasks) {
+    @Override
+    public String showTaskDeleted(Task task, int totalTasks) {
         showDivider();
         showMessage("Noted. I've removed this task:");
         showMessage("  " + task);
         showMessage("Now you have " + totalTasks + " tasks in the list.");
         showDivider();
+        return "";
     }
 
     /**
      * Shows a task marked as done confirmation message.
      *
      * @param task The task that was marked.
+     * @return An empty string.
      */
-    public void showTaskMarked(Task task) {
+    @Override
+    public String showTaskMarked(Task task) {
         showDivider();
         showMessage("Nice! I've marked this task as done:");
         showMessage("  " + task);
         showDivider();
+        return "";
     }
 
     /**
      * Shows a task unmarked confirmation message.
      *
      * @param task The task that was unmarked.
+     * @return An empty string.
      */
-    public void showTaskUnmarked(Task task) {
+    @Override
+    public String showTaskUnmarked(Task task) {
         showDivider();
         showMessage("OK, I've marked this task as not done yet:");
         showMessage("  " + task);
         showDivider();
+        return "";
     }
 
     /**
      * Shows the list of tasks.
      *
      * @param tasks The task list to display.
+     * @return An empty string.
      */
-    public void showTaskList(TaskList tasks) {
+    @Override
+    public String showTaskList(TaskList tasks) {
         showDivider();
         for (int i = 0; i < tasks.getSize(); i++) {
             showMessage((i + 1) + "." + tasks.getTask(i));
         }
         showDivider();
+        return "";
     }
 
     /**
@@ -136,8 +172,10 @@ public class Cli implements Ui {
      *
      * @param matchingTasks The task list containing tasks that match the search criteria
      * @param keyword The keyword that was searched for
+     * @return An empty string.
      */
-    public void showFindResults(TaskList matchingTasks, String keyword) {
+    @Override
+    public String showFindResults(TaskList matchingTasks, String keyword) {
         showDivider();
         if (matchingTasks.isEmpty()) {
             showMessage("No matching tasks found for keyword: " + keyword);
@@ -148,6 +186,7 @@ public class Cli implements Ui {
             }
         }
         showDivider();
+        return "";
     }
 
     /**
@@ -155,6 +194,7 @@ public class Cli implements Ui {
      *
      * @return The user's input as a string.
      */
+    @Override
     public String readCommand() {
         return scanner.nextLine();
     }
@@ -162,6 +202,7 @@ public class Cli implements Ui {
     /**
      * Closes the scanner to free resources.
      */
+    @Override
     public void close() {
         scanner.close();
     }

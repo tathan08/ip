@@ -2,7 +2,7 @@ package jinjja.command;
 
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
-import jinjja.ui.Cli;
+import jinjja.ui.Ui;
 
 /**
  * Command representing an invalid or erroneous command.
@@ -15,8 +15,8 @@ public class InvalidCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Cli cli) {
-        cli.showMessageWithDivider(errorMessage);
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
+        return ui.showMessageWithDivider(errorMessage);
     }
 
     @Override

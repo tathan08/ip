@@ -3,7 +3,7 @@ package jinjja.command;
 import jinjja.storage.Storage;
 import jinjja.task.Task;
 import jinjja.task.TaskList;
-import jinjja.ui.Cli;
+import jinjja.ui.Ui;
 
 /**
  * Command to delete a task.
@@ -16,12 +16,12 @@ public class DeleteCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Cli cli) {
+    public String execute(TaskList tasks, Storage storage, Ui ui) {
         try {
             Task removedTask = tasks.removeTask(taskNumber - 1);
-            cli.showTaskDeleted(removedTask, tasks.getSize());
+            return ui.showTaskDeleted(removedTask, tasks.getSize());
         } catch (ArrayIndexOutOfBoundsException e) {
-            cli.showMessageWithDivider(e.getMessage());
+            return ui.showMessageWithDivider(e.getMessage());
         }
     }
 
