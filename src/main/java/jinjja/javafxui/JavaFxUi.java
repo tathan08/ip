@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import jinjja.Jinjja;
 
 /**
  * JavaFX UI for Jinjja chatbot.
@@ -24,6 +25,7 @@ public class JavaFxUi extends Application {
 
     private Image userImage = new Image(this.getClass().getResourceAsStream("/images/userLogo.jpeg"));
     private Image jinjjaImage = new Image(this.getClass().getResourceAsStream("/images/jinjjaLogo.jpeg"));
+    private Jinjja jinjja = new Jinjja();
 
     @Override
     public void start(Stage stage) {
@@ -80,7 +82,12 @@ public class JavaFxUi extends Application {
      * processing.
      */
     private void handleUserInput() {
-        dialogContainer.getChildren().addAll(new DialogBox(userInput.getText(), userImage));
+        String userText = userInput.getText();
+        String jinjjaText = jinjja.getResponse(userText);
+        dialogContainer.getChildren().addAll(
+            new DialogBox(userInput.getText(), userImage),
+            new DialogBox(jinjjaText, jinjjaImage)
+        );
         userInput.clear();
     }
 
