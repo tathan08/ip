@@ -2,7 +2,7 @@ package jinjja.command;
 
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
-import jinjja.ui.Ui;
+import jinjja.ui.Cli;
 
 /**
  * Command to unmark a task (mark as not done).
@@ -15,12 +15,12 @@ public class UnmarkCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
+    public void execute(TaskList tasks, Storage storage, Cli cli) {
         try {
             tasks.markTask(false, taskNumber - 1);
-            ui.showTaskUnmarked(tasks.getTask(taskNumber - 1));
+            cli.showTaskUnmarked(tasks.getTask(taskNumber - 1));
         } catch (ArrayIndexOutOfBoundsException e) {
-            ui.showMessageWithDivider(e.getMessage());
+            cli.showMessageWithDivider(e.getMessage());
         }
     }
 

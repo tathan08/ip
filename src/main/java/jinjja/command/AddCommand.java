@@ -3,11 +3,10 @@ package jinjja.command;
 import jinjja.storage.Storage;
 import jinjja.task.Task;
 import jinjja.task.TaskList;
-import jinjja.ui.Ui;
+import jinjja.ui.Cli;
 
 /**
- * Command to add a task to the task list.
- * This command is used for adding Todo, Deadline, and Event tasks.
+ * Command to add a task to the task list. This command is used for adding Todo, Deadline, and Event tasks.
  */
 public class AddCommand extends Command {
     private Task task;
@@ -22,17 +21,16 @@ public class AddCommand extends Command {
     }
 
     /**
-     * Executes the add command by adding the task to the task list
-     * and displaying a confirmation message to the user.
+     * Executes the add command by adding the task to the task list and displaying a confirmation message to the user.
      *
      * @param tasks The task list to add the task to
      * @param storage The storage system (not used in this command)
-     * @param ui The user interface for displaying messages
+     * @param cli The user interface for displaying messages
      */
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
+    public void execute(TaskList tasks, Storage storage, Cli cli) {
         tasks.addTask(task);
-        ui.showTaskAdded(task, tasks.getSize());
+        cli.showTaskAdded(task, tasks.getSize());
     }
 
     /**

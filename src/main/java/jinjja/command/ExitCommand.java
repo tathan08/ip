@@ -2,7 +2,7 @@ package jinjja.command;
 
 import jinjja.storage.Storage;
 import jinjja.task.TaskList;
-import jinjja.ui.Ui;
+import jinjja.ui.Cli;
 
 /**
  * Command to exit the application.
@@ -10,7 +10,7 @@ import jinjja.ui.Ui;
 public class ExitCommand extends Command {
 
     @Override
-    public void execute(TaskList tasks, Storage storage, Ui ui) {
+    public void execute(TaskList tasks, Storage storage, Cli cli) {
         // No action needed for exit command
     }
 
