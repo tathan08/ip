@@ -22,6 +22,7 @@ public class TaskList {
      * @param tasks The initial list of tasks
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "Task list cannot be null";
         this.tasks = tasks;
     }
 
@@ -33,8 +34,11 @@ public class TaskList {
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      */
     public Task getTask(int index) throws ArrayIndexOutOfBoundsException {
+        assert this.tasks != null : "Tasks list should not be null";
         if (index >= 0 && index < this.getSize()) {
-            return this.tasks.get(index);
+            Task task = this.tasks.get(index);
+            assert task != null : "Retrieved task should not be null";
+            return task;
         } else {
             throw new ArrayIndexOutOfBoundsException("Task number is out of range.");
         }
@@ -55,7 +59,11 @@ public class TaskList {
      * @param task The task to be added
      */
     public void addTask(Task task) {
+        assert task != null : "Cannot add null task to the list";
+        assert this.tasks != null : "Tasks list should be initialized";
+        int oldSize = this.getSize();
         this.tasks.add(task);
+        assert this.getSize() == oldSize + 1 : "Task list size should increase by 1 after adding a task";
     }
 
     /**
@@ -66,8 +74,13 @@ public class TaskList {
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      */
     public Task removeTask(int index) throws ArrayIndexOutOfBoundsException {
+        assert this.tasks != null : "Tasks list should not be null";
+        int oldSize = this.getSize();
         if (index >= 0 && index < this.getSize()) {
-            return this.tasks.remove(index);
+            Task removedTask = this.tasks.remove(index);
+            assert removedTask != null : "Removed task should not be null";
+            assert this.getSize() == oldSize - 1 : "Task list size should decrease by 1 after removing a task";
+            return removedTask;
         } else {
             throw new ArrayIndexOutOfBoundsException("Task number is out of range.");
         }
@@ -82,12 +95,15 @@ public class TaskList {
      * @throws NumberFormatException if the index is out of range
      */
     public void markTask(boolean isDone, int index) throws ArrayIndexOutOfBoundsException, NumberFormatException {
+        assert this.tasks != null : "Tasks list should not be null";
         if (this.isEmpty()) {
             throw new ArrayIndexOutOfBoundsException("No tasks available.");
         }
         if (index >= 0 && index < this.getSize()) {
             Task task = this.tasks.get(index);
+            assert task != null : "Task at valid index should not be null";
             task.setDone(isDone);
+            assert task.getIsDone() == isDone : "Task status should be updated correctly";
         } else {
             throw new NumberFormatException(
                     "Task number is out of range. \n" + "Please enter a number between 1 and " + this.getSize() + ".");

@@ -14,6 +14,8 @@ public class Task {
      * @param description The description of the task
      */
     public Task(String description) {
+        assert description != null : "Task description cannot be null";
+        assert !description.trim().isEmpty() : "Task description cannot be empty";
         this.isDone = false;
         this.description = description;
     }
@@ -26,6 +28,7 @@ public class Task {
      */
     public boolean setDone(boolean isDone) {
         this.isDone = isDone;
+        assert this.isDone == isDone : "Task completion status should be updated correctly";
         return true; // Indicate that the status was changed
     }
 
