@@ -1,6 +1,7 @@
 package jinjja.parser;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -126,12 +127,29 @@ public class ParserTest {
 
     @Test
     public void parse_eventWithoutDescription_returnsInvalidCommand() {
-        Command command = Parser.parse("event /from 2025-09-15 10:00 /to 2025-09-15 11:30");
+        // There are 2 possible behaviors depending on whether assertions are enabled
+        // If assertions are enabled, it should throw an AssertionError
+        // If assertions are not enabled, it should return InvalidCommand
 
-        // The parser doesn't properly validate empty descriptions for events
-        // This test documents the current behavior - it creates an AddCommand with empty description
-        assertTrue(command instanceof AddCommand);
-        assertFalse(command.canExit());
+        // Check if assertions are enabled by trying to trigger one
+        boolean assertionsEnabled = false;
+        try {
+            assert false;
+        } catch (AssertionError e) {
+            assertionsEnabled = true;
+        }
+
+        if (assertionsEnabled) {
+            // If assertions are enabled, this should throw an AssertionError
+            assertThrows(AssertionError.class, ()-> {
+                Parser.parse("event /from 2025-09-15 10:00 /to 2025-09-15 11:30");
+            });
+        } else {
+            // If assertions are not enabled, it should return InvalidCommand
+            Command command = Parser.parse("event /from 2025-09-15 10:00 /to 2025-09-15 11:30");
+            assertTrue(command instanceof InvalidCommand);
+            assertFalse(command.canExit());
+        }
     }
 
     @Test

@@ -16,12 +16,15 @@ public class Event extends Task {
     /**
      * Constructs a new Event task with a start and end time.
      *
-     * @param description
-     * @param from
-     * @param to
+     * @param description The description of the event task
+     * @param from The start date and time of the event
+     * @param to The end date and time of the event
      */
     public Event(String description, LocalDateTime from, LocalDateTime to) {
         super(description);
+        assert from != null : "Event start time cannot be null";
+        assert to != null : "Event end time cannot be null";
+        assert !from.isAfter(to) : "Event start time should not be after end time";
         this.from = from;
         this.to = to;
     }

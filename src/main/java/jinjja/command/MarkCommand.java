@@ -10,12 +10,22 @@ import jinjja.ui.Ui;
 public class MarkCommand extends Command {
     private int taskNumber;
 
+    /**
+     * Constructs a MarkCommand with the specified task number.
+     *
+     * @param taskNumber The 1-indexed task number to mark as done
+     */
     public MarkCommand(int taskNumber) {
+        assert taskNumber > 0 : "Task number should be positive (1-indexed)";
         this.taskNumber = taskNumber;
     }
 
     @Override
     public String execute(TaskList tasks, Storage storage, Ui ui) {
+        assert tasks != null : "Task list cannot be null";
+        assert ui != null : "UI cannot be null";
+        assert this.taskNumber > 0 : "Task number should be positive";
+
         try {
             tasks.markTask(true, taskNumber - 1);
             return ui.showTaskMarked(tasks.getTask(taskNumber - 1));

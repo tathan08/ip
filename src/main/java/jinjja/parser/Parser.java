@@ -32,6 +32,8 @@ public class Parser {
      * @return A Command object that can be executed.
      */
     public static Command parse(String input) {
+        assert input != null : "Input cannot be null";
+
         // Split input into parts
         ArrayList<String> parts = new ArrayList<>();
         for (String part : input.split(" ")) {
@@ -43,6 +45,7 @@ public class Parser {
         }
 
         String action = parts.get(0);
+        assert action != null : "First part of input should not be null";
         CommandType commandType = CommandType.fromString(action);
 
         switch (commandType) {
@@ -78,11 +81,15 @@ public class Parser {
      * @return A MarkCommand if valid, InvalidCommand otherwise
      */
     private static Command parseMarkCommand(ArrayList<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() <= 1) {
             return new InvalidCommand("Task number is missing.");
         }
         try {
             int taskNum = Integer.parseInt(parts.get(1));
+            assert taskNum > 0 : "Task number should be positive";
             return new MarkCommand(taskNum);
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
@@ -96,11 +103,15 @@ public class Parser {
      * @return An UnmarkCommand if valid, InvalidCommand otherwise
      */
     private static Command parseUnmarkCommand(ArrayList<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() <= 1) {
             return new InvalidCommand("Task number is missing.");
         }
         try {
             int taskNum = Integer.parseInt(parts.get(1));
+            assert taskNum > 0 : "Task number should be positive";
             return new UnmarkCommand(taskNum);
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
@@ -114,6 +125,9 @@ public class Parser {
      * @return An AddCommand with a Todo task if valid, InvalidCommand otherwise
      */
     private static Command parseTodoCommand(ArrayList<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() <= 1) {
             return new InvalidCommand("Task description is missing.");
         }
@@ -127,7 +141,8 @@ public class Parser {
             }
         }
 
-        Task task = new Todo(descBuilder.toString());
+        String description = descBuilder.toString();
+        Task task = new Todo(description);
         return new AddCommand(task);
     }
 
@@ -232,6 +247,7 @@ public class Parser {
         try {
             LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
             LocalDateTime toDateTime = LocalDateTime.parse(toDateString, DATETIME_FILE);
+            assert !fromDateTime.isAfter(toDateTime) : "Event start time should not be after end time";
             Task task = new Event(taskDescription, fromDateTime, toDateTime);
             return new AddCommand(task);
         } catch (DateTimeParseException e) {
@@ -243,11 +259,15 @@ public class Parser {
      * Parses a delete command.
      */
     private static Command parseDeleteCommand(ArrayList<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() < 2) {
             return new InvalidCommand("Task number is missing.");
         }
         try {
             int taskNum = Integer.parseInt(parts.get(1));
+            assert taskNum > 0 : "Task number should be positive";
             return new DeleteCommand(taskNum);
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
