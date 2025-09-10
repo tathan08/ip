@@ -26,6 +26,25 @@ public class Parser {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
+     * Builds a string from parts of the input, joining them with spaces.
+     *
+     * @param parts The list of string parts
+     * @param startIndex The starting index (inclusive)
+     * @param endIndex The ending index (exclusive)
+     * @return The concatenated string with spaces between parts
+     */
+    private static String buildStringFromParts(ArrayList<String> parts, int startIndex, int endIndex) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = startIndex; i < endIndex; i++) {
+            builder.append(parts.get(i));
+            if (i < endIndex - 1) {
+                builder.append(" ");
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
      * Parses the user input and returns a Command object.
      *
      * @param input The user input string.
@@ -132,16 +151,7 @@ public class Parser {
             return new InvalidCommand("Task description is missing.");
         }
 
-        // Build description from remaining parts
-        StringBuilder descBuilder = new StringBuilder();
-        for (int i = 1; i < parts.size(); i++) {
-            descBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                descBuilder.append(" ");
-            }
-        }
-
-        String description = descBuilder.toString();
+        String description = buildStringFromParts(parts, 1, parts.size());
         Task task = new Todo(description);
         return new AddCommand(task);
     }
@@ -159,30 +169,15 @@ public class Parser {
             }
         }
 
-        if (byIndex == -1 || byIndex <= 1 || byIndex >= parts.size() - 1) {
+        boolean hasDelimiter = byIndex != -1;
+        boolean hasDescription = byIndex > 1;
+        boolean hasDate = byIndex < parts.size() - 1;
+        if (!hasDelimiter || !hasDescription || !hasDate) {
             return new InvalidCommand("Deadline description or /by is missing.");
         }
 
-        // Build description
-        StringBuilder descBuilder = new StringBuilder();
-        for (int i = 1; i < byIndex; i++) {
-            descBuilder.append(parts.get(i));
-            if (i < byIndex - 1) {
-                descBuilder.append(" ");
-            }
-        }
-
-        // Build date string
-        StringBuilder byBuilder = new StringBuilder();
-        for (int i = byIndex + 1; i < parts.size(); i++) {
-            byBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                byBuilder.append(" ");
-            }
-        }
-
-        String taskDescription = descBuilder.toString();
-        String byDate = byBuilder.toString();
+        String taskDescription = buildStringFromParts(parts, 1, byIndex);
+        String byDate = buildStringFromParts(parts, byIndex + 1, parts.size());
 
         // Parse the byDate string into a LocalDateTime object
         try {
@@ -209,40 +204,16 @@ public class Parser {
             }
         }
 
-        if (fromIndex == -1 || toIndex == -1 || fromIndex + 1 >= toIndex) {
+        boolean hasDelimiter = fromIndex != -1 && toIndex != -1;
+        boolean hasDescription = fromIndex > 1;
+        boolean isValidIndex = fromIndex + 1 < toIndex;
+        if (!hasDelimiter || !hasDescription || !isValidIndex) {
             return new InvalidCommand("Event description, /from, or /to is missing.");
         }
 
-        // Build description
-        StringBuilder descBuilder = new StringBuilder();
-        for (int i = 1; i < fromIndex; i++) {
-            descBuilder.append(parts.get(i));
-            if (i < fromIndex - 1) {
-                descBuilder.append(" ");
-            }
-        }
-
-        // Build from date string
-        StringBuilder fromBuilder = new StringBuilder();
-        for (int i = fromIndex + 1; i < toIndex; i++) {
-            fromBuilder.append(parts.get(i));
-            if (i < toIndex - 1) {
-                fromBuilder.append(" ");
-            }
-        }
-
-        // Build to date string
-        StringBuilder toBuilder = new StringBuilder();
-        for (int i = toIndex + 1; i < parts.size(); i++) {
-            toBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                toBuilder.append(" ");
-            }
-        }
-
-        String taskDescription = descBuilder.toString();
-        String fromDateString = fromBuilder.toString();
-        String toDateString = toBuilder.toString();
+        String taskDescription = buildStringFromParts(parts, 1, fromIndex);
+        String fromDateString = buildStringFromParts(parts, fromIndex + 1, toIndex);
+        String toDateString = buildStringFromParts(parts, toIndex + 1, parts.size());
 
         try {
             LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
@@ -285,15 +256,7 @@ public class Parser {
             return new InvalidCommand("Search keyword is missing.");
         }
 
-        // Build keyword from remaining parts (in case the keyword has multiple words)
-        StringBuilder keywordBuilder = new StringBuilder();
-        for (int i = 1; i < parts.size(); i++) {
-            keywordBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                keywordBuilder.append(" ");
-            }
-        }
-
-        return new FindCommand(keywordBuilder.toString());
+        String keyword = buildStringFromParts(parts, 1, parts.size());
+        return new FindCommand(keyword);
     }
 }
