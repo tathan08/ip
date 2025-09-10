@@ -28,6 +28,8 @@ public class Storage {
      * @param filePath The path to the file where tasks will be stored
      */
     public Storage(String filePath) {
+        assert filePath != null : "File path cannot be null";
+        assert !filePath.trim().isEmpty() : "File path cannot be empty";
         this.filePath = filePath;
     }
 
@@ -39,10 +41,14 @@ public class Storage {
      * @throws IOException If an error occurs while saving tasks to the file
      */
     public void saveTasksToFile(ArrayList<Task> tasks) throws IOException {
+        assert tasks != null : "Task list cannot be null when saving";
+        assert this.filePath != null : "File path should be initialized";
+
         // Create directory if it doesn't exist
         File dataDir = new File("ip/data");
         if (!dataDir.exists()) {
-            dataDir.mkdirs();
+            boolean dirCreated = dataDir.mkdirs();
+            assert dirCreated || dataDir.exists() : "Data directory should be created or already exist";
         }
 
         // Write all current tasks into the file
@@ -50,7 +56,10 @@ public class Storage {
         FileWriter writer = new FileWriter(this.filePath);
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
-            writer.write(task.toFileFormat() + "\n");
+            assert task != null : "Individual task in list should not be null";
+            String fileFormat = task.toFileFormat();
+            assert fileFormat != null && !fileFormat.trim().isEmpty() : "Task file format should not be null or empty";
+            writer.write(fileFormat + "\n");
         }
         writer.close();
         System.out.println("Tasks saved to " + this.filePath);
@@ -74,10 +83,14 @@ public class Storage {
         Scanner fileScanner = new Scanner(dataFile);
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
+            assert line != null : "File line should not be null";
             String[] parts = line.split(" \\| ");
+            assert parts.length >= 3 : "File format should have at least 3 parts";
             String taskType = parts[0];
+            assert taskType != null && !taskType.trim().isEmpty() : "Task type should not be null or empty";
             boolean isDone = parts[1].equals("1");
             String description = parts[2];
+            assert description != null : "Task description should not be null";
 
             Task task = null;
             switch (taskType) {
@@ -85,15 +98,24 @@ public class Storage {
                 task = new Todo(description);
                 break;
             case "D":
+                assert parts.length >= 4 : "Deadline task should have at least 4 parts";
                 String byDateString = parts[3];
+                assert byDateString != null
+                        && !byDateString.trim().isEmpty() : "Deadline date should not be null or empty";
                 LocalDateTime byDate = LocalDateTime.parse(byDateString, DATETIME_FILE);
                 task = new Deadline(description, byDate);
                 break;
             case "E":
+                assert parts.length >= 5 : "Event task should have at least 5 parts";
                 String fromDateString = parts[3];
                 String toDateString = parts[4];
+                assert fromDateString != null
+                        && !fromDateString.trim().isEmpty() : "Event from date should not be null or empty";
+                assert toDateString != null
+                        && !toDateString.trim().isEmpty() : "Event to date should not be null or empty";
                 LocalDateTime fromDate = LocalDateTime.parse(fromDateString, DATETIME_FILE);
                 LocalDateTime toDate = LocalDateTime.parse(toDateString, DATETIME_FILE);
+                assert !fromDate.isAfter(toDate) : "Event start time should not be after end time";
                 task = new Event(description, fromDate, toDate);
                 break;
             default:
