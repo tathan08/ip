@@ -26,8 +26,7 @@ public class Jinjja {
     /**
      * Constructor for the Jinjja chatbot.
      * Separates UI, Storage, and TaskList components.
-     * Creates new TaskList file if there are errors loading the current one in
-     * Storage.
+     * Creates new TaskList file if there are errors loading the current one in Storage.
      *
      * @param isGui true if the UI is graphical, false for command-line interface
      */
@@ -85,6 +84,8 @@ public class Jinjja {
      * Parses and executes a command for the GUI, returning the output string.
      */
     public String getResponse(String input) {
+        assert input != null : "Input cannot be null";
+
         if (this.storage == null) {
             this.storage = new Storage(DATA_FILE_PATH);
         }
@@ -95,7 +96,13 @@ public class Jinjja {
                 this.list = new TaskList();
             }
         }
+
+        assert this.storage != null : "Storage should be initialized";
+        assert this.list != null : "Task list should be initialized";
+        assert this.ui != null : "UI should be initialized";
+
         Command c = Parser.parse(input);
+        assert c != null : "Parser should return a non-null command";
         return c.execute(this.list, this.storage, this.ui);
     }
 }

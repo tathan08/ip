@@ -28,12 +28,33 @@ public class Parser {
     private static final DateTimeFormatter DATETIME_FILE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
+     * Builds a string from parts of the input, joining them with spaces.
+     *
+     * @param parts The list of string parts
+     * @param startIndex The starting index (inclusive)
+     * @param endIndex The ending index (exclusive)
+     * @return The concatenated string with spaces between parts
+     */
+    private static String buildStringFromParts(List<String> parts, int startIndex, int endIndex) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = startIndex; i < endIndex; i++) {
+            builder.append(parts.get(i));
+            if (i < endIndex - 1) {
+                builder.append(" ");
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
      * Parses the user input and returns a Command object.
      *
      * @param input The user input string.
      * @return A Command object that can be executed.
      */
     public static Command parse(String input) {
+        assert input != null : "Input cannot be null";
+
         // Split input into parts using streams
         List<String> parts = Arrays.stream(input.split(" "))
             .collect(Collectors.toList());
@@ -43,6 +64,7 @@ public class Parser {
         }
 
         String action = parts.get(0);
+        assert action != null : "First part of input should not be null";
         CommandType commandType = CommandType.fromString(action);
 
         switch (commandType) {
@@ -78,11 +100,15 @@ public class Parser {
      * @return A MarkCommand if valid, InvalidCommand otherwise
      */
     private static Command parseMarkCommand(List<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() <= 1) {
             return new InvalidCommand("Task number is missing.");
         }
         try {
             int taskNum = Integer.parseInt(parts.get(1));
+            assert taskNum > 0 : "Task number should be positive";
             return new MarkCommand(taskNum);
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
@@ -96,11 +122,15 @@ public class Parser {
      * @return An UnmarkCommand if valid, InvalidCommand otherwise
      */
     private static Command parseUnmarkCommand(List<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() <= 1) {
             return new InvalidCommand("Task number is missing.");
         }
         try {
             int taskNum = Integer.parseInt(parts.get(1));
+            assert taskNum > 0 : "Task number should be positive";
             return new UnmarkCommand(taskNum);
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
@@ -114,16 +144,14 @@ public class Parser {
      * @return An AddCommand with a Todo task if valid, InvalidCommand otherwise
      */
     private static Command parseTodoCommand(List<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() <= 1) {
             return new InvalidCommand("Task description is missing.");
         }
 
-        // Build description from remaining parts using streams
-        String description = parts.stream()
-            .skip(1)
-            .collect(
-                Collectors.joining(" "));
-
+        String description = buildStringFromParts(parts, 1, parts.size());
         Task task = new Todo(description);
         return new AddCommand(task);
     }
@@ -141,22 +169,15 @@ public class Parser {
             }
         }
 
-        if (byIndex == -1 || byIndex <= 1 || byIndex >= parts.size() - 1) {
+        boolean hasDelimiter = byIndex != -1;
+        boolean hasDescription = byIndex > 1;
+        boolean hasDate = byIndex < parts.size() - 1;
+        if (!hasDelimiter || !hasDescription || !hasDate) {
             return new InvalidCommand("Deadline description or /by is missing.");
         }
 
-        // Build description using streams
-        String taskDescription = parts.stream()
-            .skip(1)
-            .limit(byIndex - 1)
-            .collect(
-                Collectors.joining(" "));
-
-        // Build date string using streams
-        String byDate = parts.stream()
-            .skip(byIndex + 1)
-            .collect(
-                Collectors.joining(" "));
+        String taskDescription = buildStringFromParts(parts, 1, byIndex);
+        String byDate = buildStringFromParts(parts, byIndex + 1, parts.size());
 
         // Parse the byDate string into a LocalDateTime object
         try {
@@ -183,33 +204,21 @@ public class Parser {
             }
         }
 
-        if (fromIndex == -1 || toIndex == -1 || fromIndex + 1 >= toIndex) {
+        boolean hasDelimiter = fromIndex != -1 && toIndex != -1;
+        boolean hasDescription = fromIndex > 1;
+        boolean isValidIndex = fromIndex + 1 < toIndex;
+        if (!hasDelimiter || !hasDescription || !isValidIndex) {
             return new InvalidCommand("Event description, /from, or /to is missing.");
         }
 
-        // Build description using streams
-        String taskDescription = parts.stream()
-            .skip(1)
-            .limit(fromIndex - 1)
-            .collect(
-                Collectors.joining(" "));
-
-        // Build from date string using streams
-        String fromDateString = parts.stream()
-            .skip(fromIndex + 1)
-            .limit(toIndex - fromIndex - 1)
-            .collect(
-                Collectors.joining(" "));
-
-        // Build to date string using streams
-        String toDateString = parts.stream()
-            .skip(toIndex + 1)
-            .collect(
-                Collectors.joining(" "));
+        String taskDescription = buildStringFromParts(parts, 1, fromIndex);
+        String fromDateString = buildStringFromParts(parts, fromIndex + 1, toIndex);
+        String toDateString = buildStringFromParts(parts, toIndex + 1, parts.size());
 
         try {
             LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
             LocalDateTime toDateTime = LocalDateTime.parse(toDateString, DATETIME_FILE);
+            assert !fromDateTime.isAfter(toDateTime) : "Event start time should not be after end time";
             Task task = new Event(taskDescription, fromDateTime, toDateTime);
             return new AddCommand(task);
         } catch (DateTimeParseException e) {
@@ -221,11 +230,15 @@ public class Parser {
      * Parses a delete command.
      */
     private static Command parseDeleteCommand(List<String> parts) {
+        assert parts != null : "Parts list should not be null";
+        assert parts.size() > 0 : "Parts list should contain at least the command";
+
         if (parts.size() < 2) {
             return new InvalidCommand("Task number is missing.");
         }
         try {
             int taskNum = Integer.parseInt(parts.get(1));
+            assert taskNum > 0 : "Task number should be positive";
             return new DeleteCommand(taskNum);
         } catch (NumberFormatException e) {
             return new InvalidCommand("Invalid task number format. " + e.getMessage());
@@ -243,12 +256,7 @@ public class Parser {
             return new InvalidCommand("Search keyword is missing.");
         }
 
-        // Build keyword from remaining parts using streams
-        String keyword = parts.stream()
-            .skip(1)
-            .collect(
-                Collectors.joining(" "));
-
+        String keyword = buildStringFromParts(parts, 1, parts.size());
         return new FindCommand(keyword);
     }
 }
