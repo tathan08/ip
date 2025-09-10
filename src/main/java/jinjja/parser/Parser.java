@@ -155,7 +155,10 @@ public class Parser {
             }
         }
 
-        if (byIndex == -1 || byIndex <= 1 || byIndex >= parts.size() - 1) {
+        boolean hasDelimiter = byIndex != -1;
+        boolean hasDescription = byIndex > 1;
+        boolean hasDate = byIndex < parts.size() - 1;
+        if (!hasDelimiter || !hasDescription || !hasDate) {
             return new InvalidCommand("Deadline description or /by is missing.");
         }
 
@@ -187,7 +190,10 @@ public class Parser {
             }
         }
 
-        if (fromIndex == -1 || toIndex == -1 || fromIndex + 1 >= toIndex) {
+        boolean hasDelimiter = fromIndex != -1 && toIndex != -1;
+        boolean hasDescription = fromIndex > 1;
+        boolean isValidIndex = fromIndex + 1 < toIndex;
+        if (!hasDelimiter || !hasDescription || !isValidIndex) {
             return new InvalidCommand("Event description, /from, or /to is missing.");
         }
 
