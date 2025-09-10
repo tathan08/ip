@@ -3,7 +3,9 @@ package jinjja.parser;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import jinjja.command.AddCommand;
 import jinjja.command.Command;
@@ -32,11 +34,9 @@ public class Parser {
      * @return A Command object that can be executed.
      */
     public static Command parse(String input) {
-        // Split input into parts
-        ArrayList<String> parts = new ArrayList<>();
-        for (String part : input.split(" ")) {
-            parts.add(part);
-        }
+        // Split input into parts using streams
+        List<String> parts = Arrays.stream(input.split(" "))
+            .collect(Collectors.toList());
 
         if (parts.isEmpty()) {
             return new InvalidCommand("Empty command");
@@ -77,7 +77,7 @@ public class Parser {
      * @param parts The input split into parts
      * @return A MarkCommand if valid, InvalidCommand otherwise
      */
-    private static Command parseMarkCommand(ArrayList<String> parts) {
+    private static Command parseMarkCommand(List<String> parts) {
         if (parts.size() <= 1) {
             return new InvalidCommand("Task number is missing.");
         }
@@ -95,7 +95,7 @@ public class Parser {
      * @param parts The input split into parts
      * @return An UnmarkCommand if valid, InvalidCommand otherwise
      */
-    private static Command parseUnmarkCommand(ArrayList<String> parts) {
+    private static Command parseUnmarkCommand(List<String> parts) {
         if (parts.size() <= 1) {
             return new InvalidCommand("Task number is missing.");
         }
@@ -113,28 +113,25 @@ public class Parser {
      * @param parts The input split into parts
      * @return An AddCommand with a Todo task if valid, InvalidCommand otherwise
      */
-    private static Command parseTodoCommand(ArrayList<String> parts) {
+    private static Command parseTodoCommand(List<String> parts) {
         if (parts.size() <= 1) {
             return new InvalidCommand("Task description is missing.");
         }
 
-        // Build description from remaining parts
-        StringBuilder descBuilder = new StringBuilder();
-        for (int i = 1; i < parts.size(); i++) {
-            descBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                descBuilder.append(" ");
-            }
-        }
+        // Build description from remaining parts using streams
+        String description = parts.stream()
+            .skip(1)
+            .collect(
+                Collectors.joining(" "));
 
-        Task task = new Todo(descBuilder.toString());
+        Task task = new Todo(description);
         return new AddCommand(task);
     }
 
     /**
      * Parses a deadline command.
      */
-    private static Command parseDeadlineCommand(ArrayList<String> parts) {
+    private static Command parseDeadlineCommand(List<String> parts) {
         // Find the "/by" delimiter
         int byIndex = -1;
         for (int i = 1; i < parts.size(); i++) {
@@ -148,26 +145,18 @@ public class Parser {
             return new InvalidCommand("Deadline description or /by is missing.");
         }
 
-        // Build description
-        StringBuilder descBuilder = new StringBuilder();
-        for (int i = 1; i < byIndex; i++) {
-            descBuilder.append(parts.get(i));
-            if (i < byIndex - 1) {
-                descBuilder.append(" ");
-            }
-        }
+        // Build description using streams
+        String taskDescription = parts.stream()
+            .skip(1)
+            .limit(byIndex - 1)
+            .collect(
+                Collectors.joining(" "));
 
-        // Build date string
-        StringBuilder byBuilder = new StringBuilder();
-        for (int i = byIndex + 1; i < parts.size(); i++) {
-            byBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                byBuilder.append(" ");
-            }
-        }
-
-        String taskDescription = descBuilder.toString();
-        String byDate = byBuilder.toString();
+        // Build date string using streams
+        String byDate = parts.stream()
+            .skip(byIndex + 1)
+            .collect(
+                Collectors.joining(" "));
 
         // Parse the byDate string into a LocalDateTime object
         try {
@@ -182,7 +171,7 @@ public class Parser {
     /**
      * Parses an event command.
      */
-    private static Command parseEventCommand(ArrayList<String> parts) {
+    private static Command parseEventCommand(List<String> parts) {
         // Find the "/from" and "/to" delimiters
         int fromIndex = -1;
         int toIndex = -1;
@@ -198,36 +187,25 @@ public class Parser {
             return new InvalidCommand("Event description, /from, or /to is missing.");
         }
 
-        // Build description
-        StringBuilder descBuilder = new StringBuilder();
-        for (int i = 1; i < fromIndex; i++) {
-            descBuilder.append(parts.get(i));
-            if (i < fromIndex - 1) {
-                descBuilder.append(" ");
-            }
-        }
+        // Build description using streams
+        String taskDescription = parts.stream()
+            .skip(1)
+            .limit(fromIndex - 1)
+            .collect(
+                Collectors.joining(" "));
 
-        // Build from date string
-        StringBuilder fromBuilder = new StringBuilder();
-        for (int i = fromIndex + 1; i < toIndex; i++) {
-            fromBuilder.append(parts.get(i));
-            if (i < toIndex - 1) {
-                fromBuilder.append(" ");
-            }
-        }
+        // Build from date string using streams
+        String fromDateString = parts.stream()
+            .skip(fromIndex + 1)
+            .limit(toIndex - fromIndex - 1)
+            .collect(
+                Collectors.joining(" "));
 
-        // Build to date string
-        StringBuilder toBuilder = new StringBuilder();
-        for (int i = toIndex + 1; i < parts.size(); i++) {
-            toBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                toBuilder.append(" ");
-            }
-        }
-
-        String taskDescription = descBuilder.toString();
-        String fromDateString = fromBuilder.toString();
-        String toDateString = toBuilder.toString();
+        // Build to date string using streams
+        String toDateString = parts.stream()
+            .skip(toIndex + 1)
+            .collect(
+                Collectors.joining(" "));
 
         try {
             LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
@@ -242,7 +220,7 @@ public class Parser {
     /**
      * Parses a delete command.
      */
-    private static Command parseDeleteCommand(ArrayList<String> parts) {
+    private static Command parseDeleteCommand(List<String> parts) {
         if (parts.size() < 2) {
             return new InvalidCommand("Task number is missing.");
         }
@@ -260,20 +238,17 @@ public class Parser {
      * @param parts The input split into parts
      * @return A FindCommand if valid, InvalidCommand otherwise
      */
-    private static Command parseFindCommand(ArrayList<String> parts) {
+    private static Command parseFindCommand(List<String> parts) {
         if (parts.size() <= 1) {
             return new InvalidCommand("Search keyword is missing.");
         }
 
-        // Build keyword from remaining parts (in case the keyword has multiple words)
-        StringBuilder keywordBuilder = new StringBuilder();
-        for (int i = 1; i < parts.size(); i++) {
-            keywordBuilder.append(parts.get(i));
-            if (i < parts.size() - 1) {
-                keywordBuilder.append(" ");
-            }
-        }
+        // Build keyword from remaining parts using streams
+        String keyword = parts.stream()
+            .skip(1)
+            .collect(
+                Collectors.joining(" "));
 
-        return new FindCommand(keywordBuilder.toString());
+        return new FindCommand(keyword);
     }
 }
