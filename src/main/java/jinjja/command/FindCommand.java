@@ -1,7 +1,6 @@
 package jinjja.command;
 
 import jinjja.storage.Storage;
-import jinjja.task.Task;
 import jinjja.task.TaskList;
 import jinjja.ui.Ui;
 
@@ -33,13 +32,9 @@ public class FindCommand extends Command {
     public String execute(TaskList tasks, Storage storage, Ui ui) {
         TaskList matchingTasks = new TaskList();
 
-        // Search through all tasks for the keyword
-        for (int i = 0; i < tasks.getSize(); i++) {
-            Task task = tasks.getTask(i);
-            if (task.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
-                matchingTasks.addTask(task);
-            }
-        }
+        // Search through all tasks for the keyword using streams and add to matchingTasks
+        tasks.getTasks().stream().filter(task->task.getDescription().toLowerCase().contains(keyword.toLowerCase()))
+                .forEach(matchingTasks::addTask);
 
         // Display the results
         return ui.showFindResults(matchingTasks, keyword);
