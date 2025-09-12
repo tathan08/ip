@@ -205,13 +205,17 @@ public class Parser {
         }
 
         boolean hasDelimiter = fromIndex != -1 && toIndex != -1;
-        boolean hasDescription = fromIndex > 1;
         boolean isValidIndex = fromIndex + 1 < toIndex;
-        if (!hasDelimiter || !hasDescription || !isValidIndex) {
-            return new InvalidCommand("Event description, /from, or /to is missing.");
+        if (!hasDelimiter || !isValidIndex) {
+            return new InvalidCommand("/from, or /to is missing.");
         }
 
         String taskDescription = buildStringFromParts(parts, 1, fromIndex);
+        assert !taskDescription.trim().isEmpty() : "Task description should not be empty";
+        if (taskDescription.trim().isEmpty()) {
+            return new InvalidCommand("Event description is missing.");
+        }
+        
         String fromDateString = buildStringFromParts(parts, fromIndex + 1, toIndex);
         String toDateString = buildStringFromParts(parts, toIndex + 1, parts.size());
 
