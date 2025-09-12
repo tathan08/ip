@@ -3,7 +3,9 @@ package jinjja.parser;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import jinjja.command.AddCommand;
 import jinjja.command.Command;
@@ -33,7 +35,7 @@ public class Parser {
      * @param endIndex The ending index (exclusive)
      * @return The concatenated string with spaces between parts
      */
-    private static String buildStringFromParts(ArrayList<String> parts, int startIndex, int endIndex) {
+    private static String buildStringFromParts(List<String> parts, int startIndex, int endIndex) {
         StringBuilder builder = new StringBuilder();
         for (int i = startIndex; i < endIndex; i++) {
             builder.append(parts.get(i));
@@ -53,11 +55,9 @@ public class Parser {
     public static Command parse(String input) {
         assert input != null : "Input cannot be null";
 
-        // Split input into parts
-        ArrayList<String> parts = new ArrayList<>();
-        for (String part : input.split(" ")) {
-            parts.add(part);
-        }
+        // Split input into parts using streams
+        List<String> parts = Arrays.stream(input.split(" "))
+            .collect(Collectors.toList());
 
         if (parts.isEmpty()) {
             return new InvalidCommand("Empty command");
@@ -99,7 +99,7 @@ public class Parser {
      * @param parts The input split into parts
      * @return A MarkCommand if valid, InvalidCommand otherwise
      */
-    private static Command parseMarkCommand(ArrayList<String> parts) {
+    private static Command parseMarkCommand(List<String> parts) {
         assert parts != null : "Parts list should not be null";
         assert parts.size() > 0 : "Parts list should contain at least the command";
 
@@ -121,7 +121,7 @@ public class Parser {
      * @param parts The input split into parts
      * @return An UnmarkCommand if valid, InvalidCommand otherwise
      */
-    private static Command parseUnmarkCommand(ArrayList<String> parts) {
+    private static Command parseUnmarkCommand(List<String> parts) {
         assert parts != null : "Parts list should not be null";
         assert parts.size() > 0 : "Parts list should contain at least the command";
 
@@ -143,7 +143,7 @@ public class Parser {
      * @param parts The input split into parts
      * @return An AddCommand with a Todo task if valid, InvalidCommand otherwise
      */
-    private static Command parseTodoCommand(ArrayList<String> parts) {
+    private static Command parseTodoCommand(List<String> parts) {
         assert parts != null : "Parts list should not be null";
         assert parts.size() > 0 : "Parts list should contain at least the command";
 
@@ -159,7 +159,7 @@ public class Parser {
     /**
      * Parses a deadline command.
      */
-    private static Command parseDeadlineCommand(ArrayList<String> parts) {
+    private static Command parseDeadlineCommand(List<String> parts) {
         // Find the "/by" delimiter
         int byIndex = -1;
         for (int i = 1; i < parts.size(); i++) {
@@ -192,7 +192,7 @@ public class Parser {
     /**
      * Parses an event command.
      */
-    private static Command parseEventCommand(ArrayList<String> parts) {
+    private static Command parseEventCommand(List<String> parts) {
         // Find the "/from" and "/to" delimiters
         int fromIndex = -1;
         int toIndex = -1;
@@ -205,13 +205,17 @@ public class Parser {
         }
 
         boolean hasDelimiter = fromIndex != -1 && toIndex != -1;
-        boolean hasDescription = fromIndex > 1;
         boolean isValidIndex = fromIndex + 1 < toIndex;
-        if (!hasDelimiter || !hasDescription || !isValidIndex) {
-            return new InvalidCommand("Event description, /from, or /to is missing.");
+        if (!hasDelimiter || !isValidIndex) {
+            return new InvalidCommand("/from, or /to is missing.");
         }
 
         String taskDescription = buildStringFromParts(parts, 1, fromIndex);
+        assert !taskDescription.trim().isEmpty() : "Task description should not be empty";
+        if (taskDescription.trim().isEmpty()) {
+            return new InvalidCommand("Event description is missing.");
+        }
+        
         String fromDateString = buildStringFromParts(parts, fromIndex + 1, toIndex);
         String toDateString = buildStringFromParts(parts, toIndex + 1, parts.size());
 
@@ -229,7 +233,7 @@ public class Parser {
     /**
      * Parses a delete command.
      */
-    private static Command parseDeleteCommand(ArrayList<String> parts) {
+    private static Command parseDeleteCommand(List<String> parts) {
         assert parts != null : "Parts list should not be null";
         assert parts.size() > 0 : "Parts list should contain at least the command";
 
@@ -251,7 +255,7 @@ public class Parser {
      * @param parts The input split into parts
      * @return A FindCommand if valid, InvalidCommand otherwise
      */
-    private static Command parseFindCommand(ArrayList<String> parts) {
+    private static Command parseFindCommand(List<String> parts) {
         if (parts.size() <= 1) {
             return new InvalidCommand("Search keyword is missing.");
         }
