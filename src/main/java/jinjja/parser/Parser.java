@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import jinjja.command.AddCommand;
 import jinjja.command.Command;
+import jinjja.command.ConfirmCommand;
 import jinjja.command.DeleteCommand;
 import jinjja.command.ExitCommand;
 import jinjja.command.FindCommand;
@@ -19,6 +20,7 @@ import jinjja.command.UnmarkCommand;
 import jinjja.task.Deadline;
 import jinjja.task.Event;
 import jinjja.task.Task;
+import jinjja.task.Tentative;
 import jinjja.task.Todo;
 
 /**
@@ -56,8 +58,7 @@ public class Parser {
         assert input != null : "Input cannot be null";
 
         // Split input into parts using streams
-        List<String> parts = Arrays.stream(input.split(" "))
-            .collect(Collectors.toList());
+        List<String> parts = Arrays.stream(input.split(" ")).collect(Collectors.toList());
 
         if (parts.isEmpty()) {
             return new InvalidCommand("Empty command");
@@ -82,6 +83,10 @@ public class Parser {
             return parseDeadlineCommand(parts);
         case EVENT:
             return parseEventCommand(parts);
+        case TENTATIVE:
+            return parseTentativeCommand(parts);
+        case CONFIRM:
+            return parseConfirmCommand(parts);
         case DELETE:
             return parseDeleteCommand(parts);
         case FIND:
@@ -215,7 +220,7 @@ public class Parser {
         if (taskDescription.trim().isEmpty()) {
             return new InvalidCommand("Event description is missing.");
         }
-        
+
         String fromDateString = buildStringFromParts(parts, fromIndex + 1, toIndex);
         String toDateString = buildStringFromParts(parts, toIndex + 1, parts.size());
 
@@ -262,5 +267,118 @@ public class Parser {
 
         String keyword = buildStringFromParts(parts, 1, parts.size());
         return new FindCommand(keyword);
+    }
+
+    /**
+     * Parses a tentative event command from the input parts. Format: tentative DESCRIPTION /slots /from DATE /to DATE
+     * [/from DATE /to DATE ...]
+     *
+     * @param parts The input split into parts
+     * @return An AddCommand with a Tentative if valid, InvalidCommand otherwise
+     */
+    private static Command parseTentativeCommand(List<String> parts) {
+        // Find the "/slots" delimiter
+        int slotsIndex = -1;
+        for (int i = 1; i < parts.size(); i++) {
+            if (parts.get(i).equals("/slots")) {
+                slotsIndex = i;
+                break;
+            }
+        }
+
+        if (slotsIndex == -1) {
+            return new InvalidCommand("Tentative event must include /slots delimiter.");
+        }
+
+        if (slotsIndex <= 1) {
+            return new InvalidCommand("Tentative event description is missing.");
+        }
+
+        String description = buildStringFromParts(parts, 1, slotsIndex);
+
+        // Parse time slots after /slots
+        List<String> slotParts = parts.subList(slotsIndex + 1, parts.size());
+        Tentative tentative = new Tentative(description);
+
+        // Parse pairs of /from and /to
+        for (int i = 0; i < slotParts.size();) {
+            if (i >= slotParts.size() || !slotParts.get(i).equals("/from")) {
+                return new InvalidCommand("Expected /from at position " + (slotsIndex + i + 2));
+            }
+
+            // Find the corresponding /to
+            int fromIndex = i;
+            int toIndex = -1;
+            for (int j = i + 1; j < slotParts.size(); j++) {
+                if (slotParts.get(j).equals("/to")) {
+                    toIndex = j;
+                    break;
+                } else if (slotParts.get(j).equals("/from")) {
+                    break; // Found next /from without /to
+                }
+            }
+
+            if (toIndex == -1) {
+                return new InvalidCommand("Missing /to for /from at position " + (slotsIndex + fromIndex + 2));
+            }
+
+            if (toIndex <= fromIndex + 1) {
+                return new InvalidCommand("Missing date/time after /from.");
+            }
+
+            // Parse the dates
+            String fromDateString = buildStringFromParts(slotParts, fromIndex + 1, toIndex);
+
+            // Find end of /to date (either next /from or end of list)
+            int nextFromIndex = slotParts.size();
+            for (int j = toIndex + 1; j < slotParts.size(); j++) {
+                if (slotParts.get(j).equals("/from")) {
+                    nextFromIndex = j;
+                    break;
+                }
+            }
+
+            if (nextFromIndex <= toIndex + 1) {
+                return new InvalidCommand("Missing date/time after /to.");
+            }
+
+            String toDateString = buildStringFromParts(slotParts, toIndex + 1, nextFromIndex);
+
+            try {
+                LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
+                LocalDateTime toDateTime = LocalDateTime.parse(toDateString, DATETIME_FILE);
+                tentative.addTentativeSlot(fromDateTime, toDateTime);
+            } catch (DateTimeParseException e) {
+                return new InvalidCommand("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+            }
+
+            i = nextFromIndex;
+        }
+
+        if (tentative.getSlotCount() == 0) {
+            return new InvalidCommand("Tentative event must have at least one time slot.");
+        }
+
+        return new AddCommand(tentative);
+    }
+
+    /**
+     * Parses a confirm command from the input parts. Format: confirm TASK_NUMBER SLOT_NUMBER
+     *
+     * @param parts The input split into parts
+     * @return A ConfirmCommand if valid, InvalidCommand otherwise
+     */
+    private static Command parseConfirmCommand(List<String> parts) {
+        if (parts.size() < 3) {
+            return new InvalidCommand("Usage: confirm TASK_NUMBER SLOT_NUMBER");
+        }
+
+        try {
+            int taskNumber = Integer.parseInt(parts.get(1));
+            int slotNumber = Integer.parseInt(parts.get(2));
+            return new ConfirmCommand(taskNumber, slotNumber);
+        } catch (NumberFormatException e) {
+            return new InvalidCommand("Invalid task number or slot number format.");
+        }
     }
 }

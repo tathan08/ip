@@ -11,6 +11,7 @@ import java.util.Scanner;
 import jinjja.task.Deadline;
 import jinjja.task.Event;
 import jinjja.task.Task;
+import jinjja.task.Tentative;
 import jinjja.task.Todo;
 
 /**
@@ -117,6 +118,38 @@ public class Storage {
                 LocalDateTime toDate = LocalDateTime.parse(toDateString, DATETIME_FILE);
                 assert !fromDate.isAfter(toDate) : "Event start time should not be after end time";
                 task = new Event(description, fromDate, toDate);
+                break;
+            case "TE":
+                // Format: TE | isDone | description | confirmedSlot | slotCount | slot1 | slot2 | ...
+                assert parts.length >= 5 : "Tentative task should have at least 5 parts";
+                task = new Tentative(description);
+                Tentative tentative = (Tentative) task;
+
+                // Parse confirmed slot (may be empty)
+                String confirmedSlotString = parts[3];
+                if (!confirmedSlotString.isEmpty()) {
+                    String[] confirmedSlotParts = confirmedSlotString.split("\\|");
+                    if (confirmedSlotParts.length == 2) {
+                        LocalDateTime confirmedFrom = LocalDateTime.parse(confirmedSlotParts[0], DATETIME_FILE);
+                        LocalDateTime confirmedTo = LocalDateTime.parse(confirmedSlotParts[1], DATETIME_FILE);
+                        tentative.addTentativeSlot(confirmedFrom, confirmedTo);
+                        tentative.confirmSlot(1);
+                    }
+                }
+
+                // Parse tentative slots count and slots
+                int slotCount = Integer.parseInt(parts[4]);
+                assert parts.length >= 5 + slotCount : "Tentative should have all slots data";
+
+                for (int i = 0; i < slotCount; i++) {
+                    String slotString = parts[5 + i];
+                    String[] slotParts = slotString.split("\\|");
+                    if (slotParts.length == 2) {
+                        LocalDateTime slotFrom = LocalDateTime.parse(slotParts[0], DATETIME_FILE);
+                        LocalDateTime slotTo = LocalDateTime.parse(slotParts[1], DATETIME_FILE);
+                        tentative.addTentativeSlot(slotFrom, slotTo);
+                    }
+                }
                 break;
             default:
                 System.out.println("Unknown task type in file: " + taskType);
