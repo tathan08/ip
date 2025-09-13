@@ -132,14 +132,14 @@ public class ParserTest {
         // If assertions are not enabled, it should return InvalidCommand
 
         // Check if assertions are enabled by trying to trigger one
-        boolean assertionsEnabled = false;
+        boolean isAssertionsEnabled = false;
         try {
             assert false;
         } catch (AssertionError e) {
-            assertionsEnabled = true;
+            isAssertionsEnabled = true;
         }
 
-        if (assertionsEnabled) {
+        if (isAssertionsEnabled) {
             // If assertions are enabled, this should throw an AssertionError
             assertThrows(AssertionError.class, ()-> {
                 Parser.parse("event /from 2025-09-15 10:00 /to 2025-09-15 11:30");
