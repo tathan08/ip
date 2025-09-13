@@ -277,15 +277,7 @@ public class Parser {
      * @return An AddCommand with a Tentative if valid, InvalidCommand otherwise
      */
     private static Command parseTentativeCommand(List<String> parts) {
-        // Find the "/slots" delimiter
-        int slotsIndex = -1;
-        for (int i = 1; i < parts.size(); i++) {
-            if (parts.get(i).equals("/slots")) {
-                slotsIndex = i;
-                break;
-            }
-        }
-
+        int slotsIndex = findSlotsIndex(parts);
         if (slotsIndex == -1) {
             return new InvalidCommand("Tentative event must include /slots delimiter.");
         }
@@ -295,64 +287,12 @@ public class Parser {
         }
 
         String description = buildStringFromParts(parts, 1, slotsIndex);
-
-        // Parse time slots after /slots
         List<String> slotParts = parts.subList(slotsIndex + 1, parts.size());
         Tentative tentative = new Tentative(description);
 
-        // Parse pairs of /from and /to
-        for (int i = 0; i < slotParts.size();) {
-            if (i >= slotParts.size() || !slotParts.get(i).equals("/from")) {
-                return new InvalidCommand("Expected /from at position " + (slotsIndex + i + 2));
-            }
-
-            // Find the corresponding /to
-            int fromIndex = i;
-            int toIndex = -1;
-            for (int j = i + 1; j < slotParts.size(); j++) {
-                if (slotParts.get(j).equals("/to")) {
-                    toIndex = j;
-                    break;
-                } else if (slotParts.get(j).equals("/from")) {
-                    break; // Found next /from without /to
-                }
-            }
-
-            if (toIndex == -1) {
-                return new InvalidCommand("Missing /to for /from at position " + (slotsIndex + fromIndex + 2));
-            }
-
-            if (toIndex <= fromIndex + 1) {
-                return new InvalidCommand("Missing date/time after /from.");
-            }
-
-            // Parse the dates
-            String fromDateString = buildStringFromParts(slotParts, fromIndex + 1, toIndex);
-
-            // Find end of /to date (either next /from or end of list)
-            int nextFromIndex = slotParts.size();
-            for (int j = toIndex + 1; j < slotParts.size(); j++) {
-                if (slotParts.get(j).equals("/from")) {
-                    nextFromIndex = j;
-                    break;
-                }
-            }
-
-            if (nextFromIndex <= toIndex + 1) {
-                return new InvalidCommand("Missing date/time after /to.");
-            }
-
-            String toDateString = buildStringFromParts(slotParts, toIndex + 1, nextFromIndex);
-
-            try {
-                LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
-                LocalDateTime toDateTime = LocalDateTime.parse(toDateString, DATETIME_FILE);
-                tentative.addTentativeSlot(fromDateTime, toDateTime);
-            } catch (DateTimeParseException e) {
-                return new InvalidCommand("Invalid date format. Please use yyyy-MM-dd HH:mm.");
-            }
-
-            i = nextFromIndex;
+        Command slotsParseResult = parseTimeSlots(slotParts, tentative, slotsIndex);
+        if (slotsParseResult != null) {
+            return slotsParseResult;
         }
 
         if (tentative.getSlotCount() == 0) {
@@ -360,6 +300,116 @@ public class Parser {
         }
 
         return new AddCommand(tentative);
+    }
+
+    /**
+     * Finds the index of "/slots" delimiter in the input parts.
+     *
+     * @param parts The input split into parts
+     * @return The index of "/slots" or -1 if not found
+     */
+    private static int findSlotsIndex(List<String> parts) {
+        for (int i = 1; i < parts.size(); i++) {
+            if (parts.get(i).equals("/slots")) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Parses time slots from the slot parts and adds them to the tentative event.
+     *
+     * @param slotParts The parts containing the time slots
+     * @param tentative The tentative event to add slots to
+     * @param slotsIndex The original index of "/slots" for error messages
+     * @return InvalidCommand if parsing fails, null if successful
+     */
+    private static Command parseTimeSlots(List<String> slotParts, Tentative tentative, int slotsIndex) {
+        for (int i = 0; i < slotParts.size();) {
+            Command slotParseResult = parseNextTimeSlot(slotParts, tentative, i, slotsIndex);
+            if (slotParseResult instanceof InvalidCommand) {
+                return slotParseResult;
+            }
+            i = findNextFromIndex(slotParts, i);
+        }
+        return null;
+    }
+
+    /**
+     * Parses the next time slot starting at the given index.
+     *
+     * @param slotParts The parts containing the time slots
+     * @param tentative The tentative event to add the slot to
+     * @param startIndex The starting index in slotParts
+     * @param slotsIndex The original index of "/slots" for error messages
+     * @return InvalidCommand if parsing fails, null if successful
+     */
+    private static Command parseNextTimeSlot(List<String> slotParts, Tentative tentative, int startIndex,
+            int slotsIndex) {
+        if (startIndex >= slotParts.size() || !slotParts.get(startIndex).equals("/from")) {
+            return new InvalidCommand("Expected /from at position " + (slotsIndex + startIndex + 2));
+        }
+
+        int toIndex = findToIndex(slotParts, startIndex);
+        if (toIndex == -1) {
+            return new InvalidCommand("Missing /to for /from at position " + (slotsIndex + startIndex + 2));
+        }
+
+        if (toIndex <= startIndex + 1) {
+            return new InvalidCommand("Missing date/time after /from.");
+        }
+
+        int nextFromIndex = findNextFromIndex(slotParts, toIndex);
+        if (nextFromIndex <= toIndex + 1) {
+            return new InvalidCommand("Missing date/time after /to.");
+        }
+
+        String fromDateString = buildStringFromParts(slotParts, startIndex + 1, toIndex);
+        String toDateString = buildStringFromParts(slotParts, toIndex + 1, nextFromIndex);
+
+        try {
+            LocalDateTime fromDateTime = LocalDateTime.parse(fromDateString, DATETIME_FILE);
+            LocalDateTime toDateTime = LocalDateTime.parse(toDateString, DATETIME_FILE);
+            tentative.addTentativeSlot(fromDateTime, toDateTime);
+            return null;
+        } catch (DateTimeParseException e) {
+            return new InvalidCommand("Invalid date format. Please use yyyy-MM-dd HH:mm.");
+        }
+    }
+
+    /**
+     * Finds the index of the next "/to" delimiter after the given index.
+     *
+     * @param slotParts The parts containing the time slots
+     * @param fromIndex The index to start searching from
+     * @return The index of "/to" or -1 if not found before the next "/from"
+     */
+    private static int findToIndex(List<String> slotParts, int fromIndex) {
+        for (int j = fromIndex + 1; j < slotParts.size(); j++) {
+            if (slotParts.get(j).equals("/to")) {
+                return j;
+            } else if (slotParts.get(j).equals("/from")) {
+                break; // Found next /from without /to
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds the index of the next "/from" delimiter or the end of the list.
+     *
+     * @param slotParts The parts containing the time slots
+     * @param toIndex The index to start searching from
+     * @return The index of the next "/from" or the size of slotParts
+     */
+    private static int findNextFromIndex(List<String> slotParts, int toIndex) {
+        for (int j = toIndex + 1; j < slotParts.size(); j++) {
+            if (slotParts.get(j).equals("/from")) {
+                return j;
+            }
+        }
+        return slotParts.size();
     }
 
     /**
