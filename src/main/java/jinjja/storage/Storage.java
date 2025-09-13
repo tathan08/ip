@@ -76,93 +76,162 @@ public class Storage {
     public ArrayList<Task> loadTasksFromFile() throws IOException {
         File dataFile = new File(this.filePath);
         ArrayList<Task> tasks = new ArrayList<>();
+
         if (!dataFile.exists()) {
             System.out.println("No existing task list found. Starting a new list.");
-            return tasks; // No file to load from
+            return tasks;
         }
 
         Scanner fileScanner = new Scanner(dataFile);
         while (fileScanner.hasNextLine()) {
             String line = fileScanner.nextLine();
-            assert line != null : "File line should not be null";
-            String[] parts = line.split(" \\| ");
-            assert parts.length >= 3 : "File format should have at least 3 parts";
-            String taskType = parts[0];
-            assert taskType != null && !taskType.trim().isEmpty() : "Task type should not be null or empty";
-            boolean isDone = parts[1].equals("1");
-            String description = parts[2];
-            assert description != null : "Task description should not be null";
-
-            Task task = null;
-            switch (taskType) {
-            case "T":
-                task = new Todo(description);
-                break;
-            case "D":
-                assert parts.length >= 4 : "Deadline task should have at least 4 parts";
-                String byDateString = parts[3];
-                assert byDateString != null
-                        && !byDateString.trim().isEmpty() : "Deadline date should not be null or empty";
-                LocalDateTime byDate = LocalDateTime.parse(byDateString, DATETIME_FILE);
-                task = new Deadline(description, byDate);
-                break;
-            case "E":
-                assert parts.length >= 5 : "Event task should have at least 5 parts";
-                String fromDateString = parts[3];
-                String toDateString = parts[4];
-                assert fromDateString != null
-                        && !fromDateString.trim().isEmpty() : "Event from date should not be null or empty";
-                assert toDateString != null
-                        && !toDateString.trim().isEmpty() : "Event to date should not be null or empty";
-                LocalDateTime fromDate = LocalDateTime.parse(fromDateString, DATETIME_FILE);
-                LocalDateTime toDate = LocalDateTime.parse(toDateString, DATETIME_FILE);
-                assert !fromDate.isAfter(toDate) : "Event start time should not be after end time";
-                task = new Event(description, fromDate, toDate);
-                break;
-            case "TE":
-                // Format: TE | isDone | description | confirmedSlot | slotCount | slot1 | slot2 | ...
-                assert parts.length >= 5 : "Tentative task should have at least 5 parts";
-                task = new Tentative(description);
-                Tentative tentative = (Tentative) task;
-
-                // Parse confirmed slot (may be empty)
-                String confirmedSlotString = parts[3];
-                if (!confirmedSlotString.isEmpty()) {
-                    String[] confirmedSlotParts = confirmedSlotString.split("\\|");
-                    if (confirmedSlotParts.length == 2) {
-                        LocalDateTime confirmedFrom = LocalDateTime.parse(confirmedSlotParts[0], DATETIME_FILE);
-                        LocalDateTime confirmedTo = LocalDateTime.parse(confirmedSlotParts[1], DATETIME_FILE);
-                        tentative.addTentativeSlot(confirmedFrom, confirmedTo);
-                        tentative.confirmSlot(1);
-                    }
-                }
-
-                // Parse tentative slots count and slots
-                int slotCount = Integer.parseInt(parts[4]);
-                assert parts.length >= 5 + slotCount : "Tentative should have all slots data";
-
-                for (int i = 0; i < slotCount; i++) {
-                    String slotString = parts[5 + i];
-                    String[] slotParts = slotString.split("\\|");
-                    if (slotParts.length == 2) {
-                        LocalDateTime slotFrom = LocalDateTime.parse(slotParts[0], DATETIME_FILE);
-                        LocalDateTime slotTo = LocalDateTime.parse(slotParts[1], DATETIME_FILE);
-                        tentative.addTentativeSlot(slotFrom, slotTo);
-                    }
-                }
-                break;
-            default:
-                System.out.println("Unknown task type in file: " + taskType);
-                break; // task is still null
-            }
-
+            Task task = parseTaskFromLine(line);
             if (task != null) {
-                task.setDone(isDone);
                 tasks.add(task);
             }
         }
         fileScanner.close();
         System.out.println("Tasks loaded from " + this.filePath);
         return tasks;
+    }
+
+    /**
+     * Parses a single line from the file and creates the corresponding Task object.
+     *
+     * @param line The line from the file to parse
+     * @return The Task object created from the line, or null if parsing fails
+     */
+    private Task parseTaskFromLine(String line) {
+        assert line != null : "File line should not be null";
+        String[] parts = line.split(" \\| ");
+        assert parts.length >= 3 : "File format should have at least 3 parts";
+
+        String taskType = parts[0];
+        assert taskType != null && !taskType.trim().isEmpty() : "Task type should not be null or empty";
+        boolean isDone = parts[1].equals("1");
+        String description = parts[2];
+        assert description != null : "Task description should not be null";
+
+        Task task = createTaskByType(taskType, description, parts);
+        if (task != null) {
+            task.setDone(isDone);
+        }
+        return task;
+    }
+
+    /**
+     * Creates a Task object based on the task type and parsed parts.
+     *
+     * @param taskType The type of task (T, D, E, TE)
+     * @param description The task description
+     * @param parts The complete parsed parts from the file line
+     * @return The created Task object, or null if task type is unknown
+     */
+    private Task createTaskByType(String taskType, String description, String[] parts) {
+        switch (taskType) {
+        case "T":
+            return new Todo(description);
+        case "D":
+            return createDeadlineTask(description, parts);
+        case "E":
+            return createEventTask(description, parts);
+        case "TE":
+            return createTentativeTask(description, parts);
+        default:
+            System.out.println("Unknown task type in file: " + taskType);
+            return null;
+        }
+    }
+
+    /**
+     * Creates a Deadline task from the parsed parts.
+     *
+     * @param description The task description
+     * @param parts The parsed parts from the file line
+     * @return The created Deadline task
+     */
+    private Task createDeadlineTask(String description, String[] parts) {
+        assert parts.length >= 4 : "Deadline task should have at least 4 parts";
+        String byDateString = parts[3];
+        assert byDateString != null && !byDateString.trim().isEmpty() : "Deadline date should not be null or empty";
+        LocalDateTime byDate = LocalDateTime.parse(byDateString, DATETIME_FILE);
+        return new Deadline(description, byDate);
+    }
+
+    /**
+     * Creates an Event task from the parsed parts.
+     *
+     * @param description The task description
+     * @param parts The parsed parts from the file line
+     * @return The created Event task
+     */
+    private Task createEventTask(String description, String[] parts) {
+        assert parts.length >= 5 : "Event task should have at least 5 parts";
+        String fromDateString = parts[3];
+        String toDateString = parts[4];
+        assert fromDateString != null
+                && !fromDateString.trim().isEmpty() : "Event from date should not be null or empty";
+        assert toDateString != null && !toDateString.trim().isEmpty() : "Event to date should not be null or empty";
+
+        LocalDateTime fromDate = LocalDateTime.parse(fromDateString, DATETIME_FILE);
+        LocalDateTime toDate = LocalDateTime.parse(toDateString, DATETIME_FILE);
+        assert !fromDate.isAfter(toDate) : "Event start time should not be after end time";
+        return new Event(description, fromDate, toDate);
+    }
+
+    /**
+     * Creates a Tentative task from the parsed parts.
+     *
+     * @param description The task description
+     * @param parts The parsed parts from the file line
+     * @return The created Tentative task
+     */
+    private Task createTentativeTask(String description, String[] parts) {
+        assert parts.length >= 5 : "Tentative task should have at least 5 parts";
+        Tentative tentative = new Tentative(description);
+
+        parseConfirmedSlot(tentative, parts[3]);
+        parseTentativeSlots(tentative, parts);
+
+        return tentative;
+    }
+
+    /**
+     * Parses and adds the confirmed slot to a Tentative task if it exists.
+     *
+     * @param tentative The Tentative task to add the confirmed slot to
+     * @param confirmedSlotString The confirmed slot string from the file
+     */
+    private void parseConfirmedSlot(Tentative tentative, String confirmedSlotString) {
+        if (!confirmedSlotString.isEmpty()) {
+            String[] confirmedSlotParts = confirmedSlotString.split("\\|");
+            if (confirmedSlotParts.length == 2) {
+                LocalDateTime confirmedFrom = LocalDateTime.parse(confirmedSlotParts[0], DATETIME_FILE);
+                LocalDateTime confirmedTo = LocalDateTime.parse(confirmedSlotParts[1], DATETIME_FILE);
+                tentative.addTentativeSlot(confirmedFrom, confirmedTo);
+                tentative.confirmSlot(1);
+            }
+        }
+    }
+
+    /**
+     * Parses and adds tentative slots to a Tentative task.
+     *
+     * @param tentative The Tentative task to add slots to
+     * @param parts The parsed parts from the file line
+     */
+    private void parseTentativeSlots(Tentative tentative, String[] parts) {
+        int slotCount = Integer.parseInt(parts[4]);
+        assert parts.length >= 5 + slotCount : "Tentative should have all slots data";
+
+        for (int i = 0; i < slotCount; i++) {
+            String slotString = parts[5 + i];
+            String[] slotParts = slotString.split("\\|");
+            if (slotParts.length == 2) {
+                LocalDateTime slotFrom = LocalDateTime.parse(slotParts[0], DATETIME_FILE);
+                LocalDateTime slotTo = LocalDateTime.parse(slotParts[1], DATETIME_FILE);
+                tentative.addTentativeSlot(slotFrom, slotTo);
+            }
+        }
     }
 }
