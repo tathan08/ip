@@ -24,7 +24,19 @@ public class JavaFxUi extends Application {
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
             stage.setScene(scene);
-            fxmlLoader.<MainWindow>getController().setJinjja(jinjja); // inject the Jinjja instance
+            stage.setTitle("Jinjja");
+
+            MainWindow controller = fxmlLoader.<MainWindow>getController();
+            controller.setJinjja(jinjja); // inject the Jinjja instance
+
+            // Handle window close request
+            stage.setOnCloseRequest(event-> {
+                // Save tasks and show farewell message before closing
+                String farewellMessage = jinjja.shutdown();
+                System.out.println(farewellMessage); // Print to console for debugging
+                // The window will close automatically after this handler completes
+            });
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
