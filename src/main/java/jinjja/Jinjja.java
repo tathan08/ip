@@ -80,6 +80,13 @@ public class Jinjja {
         new Jinjja(false).run();
     }
 
+    public String getGreeting() {
+        if (this.ui == null) {
+            this.ui = new Cli();
+        }
+        return this.ui.showGreeting();
+    }
+
     /**
      * Parses and executes a command for the GUI, returning the output string.
      */

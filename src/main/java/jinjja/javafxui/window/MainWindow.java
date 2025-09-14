@@ -36,6 +36,9 @@ public class MainWindow extends AnchorPane {
     /** Injects the Jinjja instance */
     public void setJinjja(Jinjja j) {
         jinjja = j;
+        dialogContainer.getChildren().add(
+            DialogBox.getJinjjaDialog(jinjja.getGreeting(), jinjjaImage)
+        );
     }
 
     /**
