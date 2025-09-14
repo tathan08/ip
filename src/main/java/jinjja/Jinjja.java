@@ -79,13 +79,37 @@ public class Jinjja {
     }
 
     /**
-     * Returns a greeting message for the GUI.
+     * Returns a greeting message for the GUI, including storage loading status.
      */
     public String getGreeting() {
         if (this.ui == null) {
-            this.ui = new Cli();
+            this.ui = new Gui();
         }
-        return this.ui.showGreeting();
+
+        // Initialize storage and load tasks for the greeting
+        if (this.storage == null) {
+            this.storage = new Storage(DATA_FILE_PATH);
+        }
+
+        String baseGreeting = this.ui.showGreeting();
+
+        // Try to load tasks and inform user about the result
+        if (this.list == null) {
+            try {
+                this.list = new TaskList(this.storage.loadTasksFromFile());
+                int taskCount = this.list.getSize();
+                if (taskCount > 0) {
+                    return baseGreeting + "\n\nI've loaded " + taskCount + " task(s) from your save file.";
+                } else {
+                    return baseGreeting + "\n\nNo existing save file found. Starting fresh!";
+                }
+            } catch (IOException e) {
+                this.list = new TaskList();
+                return baseGreeting + "\n\nCouldn't load save file (it may not exist yet). Starting fresh!";
+            }
+        }
+
+        return baseGreeting;
     }
 
     /**
@@ -93,18 +117,6 @@ public class Jinjja {
      */
     public String getResponse(String input) {
         assert input != null : "Input cannot be null";
-
-        if (this.storage == null) {
-            this.storage = new Storage(DATA_FILE_PATH);
-        }
-        if (this.list == null) {
-            try {
-                this.list = new TaskList(this.storage.loadTasksFromFile());
-            } catch (IOException e) {
-                this.list = new TaskList();
-            }
-        }
-
         assert this.storage != null : "Storage should be initialized";
         assert this.list != null : "Task list should be initialized";
         assert this.ui != null : "UI should be initialized";
