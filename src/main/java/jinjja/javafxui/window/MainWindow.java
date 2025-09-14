@@ -37,7 +37,9 @@ public class MainWindow extends AnchorPane {
     public void setJinjja(Jinjja j) {
         jinjja = j;
         dialogContainer.getChildren().add(
-            DialogBox.getJinjjaDialog(jinjja.getGreeting(), jinjjaImage)
+            DialogBox.getJinjjaDialog(
+                jinjja.getGreeting(),
+                jinjjaImage)
         );
     }
 

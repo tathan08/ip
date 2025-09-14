@@ -11,10 +11,9 @@ import jinjja.ui.Gui;
 import jinjja.ui.Ui;
 
 /**
- * Jinjja is a personal assistant chatbot that helps users manage their tasks.
- * It supports adding, listing, marking, unmarking, and deleting tasks.
- * Tasks can be of three types: Todo, Deadline, and Event.
- * The bot can interact with users via GUI or command-line interface.
+ * Jinjja is a personal assistant chatbot that helps users manage their tasks. It supports adding, listing, marking,
+ * unmarking, and deleting tasks. Tasks can be of three types: Todo, Deadline, and Event. The bot can interact with
+ * users via GUI or command-line interface.
  */
 public class Jinjja {
     private static final String DATA_FILE_PATH = "ip/data/jinjja.txt";
@@ -24,9 +23,8 @@ public class Jinjja {
     private Ui ui;
 
     /**
-     * Constructor for the Jinjja chatbot.
-     * Separates UI, Storage, and TaskList components.
-     * Creates new TaskList file if there are errors loading the current one in Storage.
+     * Constructor for the Jinjja chatbot. Separates UI, Storage, and TaskList components. Creates new TaskList file if
+     * there are errors loading the current one in Storage.
      *
      * @param isGui true if the UI is graphical, false for command-line interface
      */
@@ -80,6 +78,9 @@ public class Jinjja {
         new Jinjja(false).run();
     }
 
+    /**
+     * Returns a greeting message for the GUI.
+     */
     public String getGreeting() {
         if (this.ui == null) {
             this.ui = new Cli();
@@ -111,5 +112,30 @@ public class Jinjja {
         Command c = Parser.parse(input);
         assert c != null : "Parser should return a non-null command";
         return c.execute(this.list, this.storage, this.ui);
+    }
+
+    /**
+     * Handles application shutdown by saving tasks and returning farewell message. This method is called when the GUI
+     * window is closed.
+     */
+    public String shutdown() {
+        if (this.storage == null) {
+            this.storage = new Storage(DATA_FILE_PATH);
+        }
+        if (this.list == null) {
+            try {
+                this.list = new TaskList(this.storage.loadTasksFromFile());
+            } catch (IOException e) {
+                this.list = new TaskList();
+            }
+        }
+
+        try {
+            storage.saveTasksToFile(this.list.getTasks());
+        } catch (IOException e) {
+            System.err.println("Error saving tasks to file: " + e.getMessage());
+        }
+
+        return this.ui.showFarewell();
     }
 }
